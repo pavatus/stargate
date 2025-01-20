@@ -7,6 +7,7 @@ import dev.pavatus.stargate.core.StargateEntities;
 import dev.pavatus.stargate.core.StargateItems;
 import net.fabricmc.api.ModInitializer;
 
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +21,13 @@ public class StargateMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		RegistryContainer.register(StargateItems.class, MOD_ID);
+		RegistryContainer.register(StargateItems.Groups.class, MOD_ID);
 		RegistryContainer.register(StargateBlocks.class, MOD_ID);
 		RegistryContainer.register(StargateBlockEntities.class, MOD_ID);
 		RegistryContainer.register(StargateEntities.class, MOD_ID);
+	}
+
+	public static Identifier id(String path) {
+		return new Identifier(MOD_ID, path);
 	}
 }
