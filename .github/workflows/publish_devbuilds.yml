@@ -50,8 +50,8 @@ jobs:
       with:
         url: ${{ secrets.DEV_BUILDS }}
         file: 'build/libs/*'
-        username: BETA BUILDS
-        avatar: 'https://mc-heads.net/avatar/duzo'
+        username: STARGATE
+        avatar: 'https://i.sstatic.net/zvZCE.jpg'
         commit: '> :sparkles: [%MESSAGE%](<%LINK%>) by [%AUTHOR%](<%AUTHOR_LINK%>)'
         message: |
           <:new1:1253371736510959636><:new2:1253371805734015006> New `${{ github.repository }}` dev build `#${{ github.run_number }}`:
