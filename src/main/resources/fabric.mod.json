@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
-	"id": "template-mod",
+	"id": "stargate",
 	"version": "${version}",
 	"name": "STARGATE",
-	"description": "todo",
+	"description": "Stargate Mod for Fabric 1.20.1.",
 	"authors": [
 		"PAVATUS"
 	],
