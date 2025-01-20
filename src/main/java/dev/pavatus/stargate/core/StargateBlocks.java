@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 
 public class StargateBlocks extends BlockContainer {
+	@PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
 	public static final Block STARGATE = new StargateBlock(ABlockSettings.create());
 	@Override
 	public Item.Settings createBlockItemSettings(Block block) {

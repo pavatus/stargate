@@ -18,6 +18,9 @@
 	"entrypoints": {
 		"main": [
 			"dev.pavatus.stargate.StargateMod"
+		],
+		"fabric-datagen": [
+			"dev.pavatus.stargate.datagen.SGDataGenerator"
 		]
 	},
 	"mixins": [
