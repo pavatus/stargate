@@ -2,25 +2,26 @@
 	"schemaVersion": 1,
 	"id": "template-mod",
 	"version": "${version}",
-	"name": "Template Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "STARGATE",
+	"description": "todo",
 	"authors": [
-		"Me!"
+		"PAVATUS"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://pavatus.github.io",
+		"sources": "https://github.com/pavatus/stargate/",
+		"issues": "https://github.com/pavatus/stargate/issues"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/template-mod/icon.png",
+	"icon": "assets/stargate/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.TemplateMod"
+			"dev.pavatus.stargate.StargateMod"
 		]
 	},
 	"mixins": [
-		"template-mod.mixins.json"
+		"stargate.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.10",
@@ -29,6 +30,6 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
+
 	}
 }
