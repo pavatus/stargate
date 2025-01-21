@@ -5,18 +5,30 @@ import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
 import dev.pavatus.stargate.core.StargateBlocks;
 import dev.pavatus.stargate.core.block.StargateBlock;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.client.render.entity.animation.Animation;
+import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.GlobalPos;
@@ -26,14 +38,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StargateBlockEntity extends BlockEntity implements StargateWrapper {
+public class StargateBlockEntity extends BlockEntity implements StargateWrapper, BlockEntityTicker<StargateBlockEntity> {
 	private Stargate stargate;
+	private GateState gateState = GateState.CLOSED;
+	public AnimationState ANIM_STATE = new AnimationState();
+	private static final Identifier SYNC_GATE_STATE = new Identifier(StargateMod.MOD_ID, "sync_gate_state");
+	public int age;
+
+	static {
+		ClientPlayNetworking.registerGlobalReceiver(StargateBlockEntity.SYNC_GATE_STATE,
+				(client, handler, buf, responseSender) -> {
+					if (client.world == null)
+						return;
+
+					StargateBlockEntity.GateState state = GateState.values()[buf.readInt()];
+					BlockPos stargatePos = buf.readBlockPos();
+
+					if (client.world.getBlockEntity(stargatePos) instanceof StargateBlockEntity stargate)
+						stargate.setGateState(state);
+				});
+	}
 
 	public StargateBlockEntity(BlockPos pos, BlockState state) {
 		super(StargateBlockEntities.STARGATE, pos, state);
 	}
-
-
 
 	@Override
 	public Stargate getStargate() {
@@ -45,11 +73,38 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 		return this.stargate;
 	}
 
+	public GateState getGateState() {
+		return this.gateState;
+	}
+
+	public void setGateState(GateState state) {
+		if (state.equals(this.getGateState())) return;
+		this.gateState = state;
+
+		this.markDirty();
+		this.syncGateState();
+
+		if (this.getWorld() instanceof ServerWorld serverWorld) {
+			serverWorld.getChunkManager().markForUpdate(this.pos);
+		}
+	}
+
+	@Nullable @Override
+	public Packet<ClientPlayPacketListener> toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
+
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return createNbt();
+	}
+
 	@Override
 	protected void writeNbt(NbtCompound nbt) {
 		super.writeNbt(nbt);
 
 		nbt.put("Stargate", this.getStargate().toNbt());
+		nbt.putInt("GateState", this.getGateState().ordinal());
 	}
 
 	@Override
@@ -59,6 +114,9 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 		if (nbt.contains("Stargate")) {
 			this.stargate = Stargate.fromNbt(nbt.getCompound("Stargate"));
 			StargateNetwork.getInstance().add(this.stargate);
+		}
+		if (nbt.contains("GateState")) {
+			this.gateState = GateState.values()[nbt.getInt("GateState")];
 		}
 	}
 
@@ -72,6 +130,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 		int counter = 0;
 		while (chosen == this.getStargate() && counter < 10) {
 			chosen = StargateNetwork.getInstance().getRandom();
+			if (chosen == this.getStargate()) continue;
 			counter++;
 		}
 
@@ -84,13 +143,29 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 		}
 
 		call.start();
+		this.setStateViaCall((ServerWorld) world, call, true);
 		player.sendMessage(Text.literal("CALL CONNECTED TO ").append(chosen.getAddress().toGlyphs()), true);
 
 		call.onEnd(c -> {
+			this.setStateViaCall((ServerWorld) world, c, false);
 			player.sendMessage(Text.literal("WORMHOLE CLOSED"), true);
 		});
 
 		return ActionResult.SUCCESS;
+	}
+
+	public void setStateViaCall(ServerWorld world, StargateCall call, boolean shouldOpen) {
+		World toWorld = world.getServer().getWorld(call.to.getAddress().pos().getDimension());
+		if (toWorld == null) return;
+		StargateBlockEntity entityTo = (StargateBlockEntity) toWorld.getBlockEntity(call.to.getAddress().pos().getPos());
+		if (entityTo == null) return;
+		entityTo.setGateState(shouldOpen ? GateState.OPEN : GateState.CLOSED);
+
+		World fromWorld = world.getServer().getWorld(call.from.getAddress().pos().getDimension());
+		if (fromWorld == null) return;
+		StargateBlockEntity entityFrom = (StargateBlockEntity) fromWorld.getBlockEntity(call.from.getAddress().pos().getPos());
+		if (entityFrom == null) return;
+		entityFrom.setGateState(shouldOpen ? GateState.OPEN : GateState.CLOSED);
 	}
 
 	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity e) {
@@ -180,5 +255,41 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 	 */
 	public Set<BlockPos> removeRing() {
 		return createRing(Blocks.AIR.getDefaultState());
+	}
+
+	private void syncGateState() {
+		if (!hasWorld() || world.isClient())
+			return;
+
+		PacketByteBuf buf = PacketByteBufs.create();
+
+		buf.writeInt(getGateState().ordinal());
+		buf.writeBlockPos(getPos());
+
+		for (PlayerEntity player : world.getPlayers()) {
+			ServerPlayNetworking.send((ServerPlayerEntity) player, SYNC_GATE_STATE, buf); // safe cast as we know its
+			// server
+		}
+	}
+
+	@Override
+	public void tick(World world, BlockPos pos, BlockState state, StargateBlockEntity blockEntity) {
+		if (world.isClient()) {
+			age++;
+
+			ANIM_STATE.startIfNotRunning(age);
+			return;
+		}
+		if (world.getServer() == null) return;
+		/*if (world.getServer().getTicks() % 20 == 0) {
+			StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
+			this.setGateState(existing != null && existing.to != this.getStargate() ? GateState.OPEN : GateState.CLOSED);
+		}*/
+	}
+
+	public enum GateState {
+		CLOSED,
+		OPEN,
+		BROKEN
 	}
 }

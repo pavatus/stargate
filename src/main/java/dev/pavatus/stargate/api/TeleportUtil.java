@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class TeleportUtil {
 	public static void teleport(LivingEntity entity, GlobalPos pos) {
-		teleport(entity, ServerLifecycleHooks.get().getWorld(pos.getDimension()), pos.getPos().toCenterPos(), Direction.NORTH);
+		teleport(entity, ServerLifecycleHooks.get().getWorld(pos.getDimension()), pos.getPos().toCenterPos(), entity.getHorizontalFacing());
 	}
 	public static void teleport(LivingEntity entity, ServerWorld world, Vec3d pos, Direction direction) {
 		world.getServer().execute(() -> {

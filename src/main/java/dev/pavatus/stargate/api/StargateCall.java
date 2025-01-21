@@ -2,6 +2,10 @@ package dev.pavatus.stargate.api;
 
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
+import dev.pavatus.stargate.core.block.StargateBlock;
+import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;

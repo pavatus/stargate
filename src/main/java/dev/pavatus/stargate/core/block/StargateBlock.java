@@ -3,6 +3,8 @@ package dev.pavatus.stargate.core.block;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,6 +17,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class StargateBlock extends HorizontalFacingBlock implements BlockEntityProvider {
@@ -92,5 +95,14 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 	@Override
 	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
 		return new StargateBlockEntity(pos, state);
+	}
+
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull World world, @NotNull BlockState state,
+																  @NotNull BlockEntityType<T> type) {
+		return (world1, blockPos, blockState, ticker) -> {
+			if (ticker instanceof StargateBlockEntity exterior)
+				exterior.tick(world, blockPos, blockState, exterior);
+		};
 	}
 }

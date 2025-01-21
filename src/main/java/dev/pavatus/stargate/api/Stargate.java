@@ -35,8 +35,12 @@ public class Stargate implements StargateCall.Wiretap {
 	 * @return the call if successful
 	 */
 	public Optional<StargateCall> dial(Stargate target) {
-		if (this == target) {
+		if (this.address.pos().getDimension() == target.address.pos().getDimension() &&
+		this.address.pos().getPos().getX() == target.address.pos().getPos().getX() &&
+		this.address.pos().getPos().getY() == target.address.pos().getPos().getY() &&
+		this.address.pos().getPos().getZ() == target.address.pos().getPos().getZ()) {
 			// cannot call self
+
 			return Optional.empty();
 		}
 		if (!this.isAvailable()) {
