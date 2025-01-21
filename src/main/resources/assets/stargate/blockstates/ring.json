@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "stargate:block/ring",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "stargate:block/ring",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "stargate:block/ring",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "stargate:block/ring",
+      "y": 0
+    }
+  }
+}

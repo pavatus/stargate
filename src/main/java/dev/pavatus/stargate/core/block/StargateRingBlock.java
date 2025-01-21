@@ -15,6 +15,6 @@ public class StargateRingBlock extends Block implements ICantBreak {
 
 	@Override
 	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+		return BlockRenderType.INVISIBLE;
 	}
 }

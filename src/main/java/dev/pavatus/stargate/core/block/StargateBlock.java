@@ -1,10 +1,7 @@
 package dev.pavatus.stargate.core.block;
 
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -63,6 +60,11 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 		}
 
 		super.onSteppedOn(world, pos, state, entity);
+	}
+
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.INVISIBLE;
 	}
 
 

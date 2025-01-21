@@ -23,7 +23,7 @@
 			"dev.pavatus.stargate.datagen.SGDataGenerator"
 		],
 		"client": [
-			"dev.pavatus.stargate.client.StargateClientMod"
+			"dev.pavatus.stargate.client.StargateModClient"
 		]
 	},
 	"mixins": [
