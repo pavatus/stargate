@@ -64,7 +64,7 @@ public class Stargate implements StargateCall.Wiretap {
 	 * @return the call if successful
 	 */
 	public Optional<StargateCall> dial(Address target) {
-		return PhoneBook.getInstance().getOptional(target)
+		return StargateNetwork.getInstance().getOptional(target)
 				.flatMap(this::dial);
 	}
 
@@ -99,7 +99,7 @@ public class Stargate implements StargateCall.Wiretap {
 		if (this.call != null) {
 			this.call.end();
 		}
-		PhoneBook.getInstance().remove(this.address);
+		StargateNetwork.getInstance().remove(this.address);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class Stargate implements StargateCall.Wiretap {
 
 	public static Stargate create(Address address) {
 		Stargate created = new Stargate(address);
-		PhoneBook.getInstance().add(created);
+		StargateNetwork.getInstance().add(created);
 		return created;
 	}
 

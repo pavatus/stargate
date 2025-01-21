@@ -11,10 +11,10 @@ import java.util.Optional;
  * A list of all the known addresses and their corresponding Stargates.
  * todo - saving/loading
  */
-public class PhoneBook {
+public class StargateNetwork {
 	private final HashMap<Address, Stargate> lookup;
 
-	public PhoneBook() {
+	public StargateNetwork() {
 		this.lookup = new HashMap<>();
 	}
 
@@ -74,7 +74,7 @@ public class PhoneBook {
 
 		return nbt;
 	}
-	public PhoneBook fromNbt(NbtCompound nbt) {
+	public StargateNetwork fromNbt(NbtCompound nbt) {
 		NbtList list = nbt.getList("Stargates", 10);
 		list.forEach(tag -> {
 			Stargate stargate = Stargate.fromNbt((NbtCompound) tag);
@@ -83,12 +83,12 @@ public class PhoneBook {
 		return this;
 	}
 
-	private static PhoneBook instance;
+	private static StargateNetwork instance;
 
-	public static PhoneBook getInstance() {
+	public static StargateNetwork getInstance() {
 		if (instance == null) {
 			StargateMod.LOGGER.info("Creating new PhoneBook instance");
-			instance = new PhoneBook();
+			instance = new StargateNetwork();
 		}
 		return instance;
 	}

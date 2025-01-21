@@ -46,7 +46,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 
 		if (nbt.contains("Stargate")) {
 			this.stargate = Stargate.fromNbt(nbt.getCompound("Stargate"));
-			PhoneBook.getInstance().add(this.stargate);
+			StargateNetwork.getInstance().add(this.stargate);
 		}
 	}
 
@@ -59,7 +59,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper 
 		Stargate chosen = this.getStargate();
 		int counter = 0;
 		while (chosen == this.getStargate() && counter < 10) {
-			chosen = PhoneBook.getInstance().getRandom();
+			chosen = StargateNetwork.getInstance().getRandom();
 			counter++;
 		}
 
