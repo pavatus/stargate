@@ -21,6 +21,9 @@
 		],
 		"fabric-datagen": [
 			"dev.pavatus.stargate.datagen.SGDataGenerator"
+		],
+		"client": [
+			"dev.pavatus.stargate.client.StargateClientMod"
 		]
 	},
 	"mixins": [

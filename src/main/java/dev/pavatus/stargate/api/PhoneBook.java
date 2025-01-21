@@ -60,6 +60,11 @@ public class PhoneBook {
 		return Optional.ofNullable(lookup.remove(address));
 	}
 
+	public Stargate getRandom() {
+		int chosen = (int) (Math.random() * lookup.size());
+		return (Stargate) lookup.values().toArray()[chosen];
+	}
+
 	public NbtCompound toNbt() {
 		NbtCompound nbt = new NbtCompound();
 

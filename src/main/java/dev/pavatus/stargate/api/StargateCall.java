@@ -5,6 +5,7 @@ import dev.drtheo.scheduler.api.TimeUnit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Represents a call between two Stargates.
@@ -17,7 +18,7 @@ public class StargateCall {
 	private final List<Wiretap> subscribers;
 
 	public StargateCall(Stargate from, Stargate to) {
-		this(from, to, 25, TimeUnit.SECONDS);
+		this(from, to, 5, TimeUnit.SECONDS);
 	}
 	/**
 	 * Represents a call between two Stargates.
@@ -46,6 +47,24 @@ public class StargateCall {
 		for (Wiretap tap : subscribers) {
 			tap.onCallEnd(this);
 		}
+	}
+
+	/**
+	 * Subscribe to call events
+	 * @return this
+	 */
+	public StargateCall onEnd(Consumer<StargateCall> consumer) {
+		subscribe(new Wiretap() {
+			@Override
+			public void onCallStart(StargateCall call) {
+			}
+
+			@Override
+			public void onCallEnd(StargateCall call) {
+				consumer.accept(call);
+			}
+		});
+		return this;
 	}
 
 	public StargateCall subscribe(Wiretap tap) {
