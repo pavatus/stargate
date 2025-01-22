@@ -189,60 +189,55 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 
 	/**
 	 * Creates a ring of state around the stargate
+	 * todo - FIX DIRECTIONS
 	 * @param state the state to create the ring with
 	 * @return the positions of the blocks created
 	 */
 	public Set<BlockPos> createRing(BlockState state) {
-		int width = 4;
-		int height = 4;
-
-		Direction facing = this.getCachedState().get(StargateBlock.FACING);
-		Direction direction = facing.rotateYClockwise();
-		BlockPos start = this.getPos().offset(direction.getOpposite(), width / 2).down(height / 2); // bottom left
-
+		int radius = 4; // Adjust the radius as needed
 		Set<BlockPos> ringPositions = new HashSet<>();
-		BlockPos current = start.up(height/2);
+		BlockPos center = this.getPos().up(radius);
 
-		// Move along the specified direction for the given width
-		for (int i = 0; i < width; i++) {
-			if (!current.equals(this.getPos())) {
-				ringPositions.add(current);
-				this.getWorld().setBlockState(current, state);
-			}
-			current = current.offset(direction);
-		}
+		int x = radius;
+		int y = 0;
+		int radiusError = 1 - x;
 
-		// Move upwards for the given height
-		for (int i = 0; i < height; i++) {
-			if (!current.equals(this.getPos())) {
-				ringPositions.add(current);
-				this.getWorld().setBlockState(current, state);
-			}
-			current = current.up();
-		}
+		while (x >= y) {
+			addCircleBlocks(center, x, y, ringPositions, state);
+			y++;
 
-		// Move back along the opposite direction for the given width
-		Direction oppositeDirection = direction.getOpposite();
-		for (int i = 0; i < width; i++) {
-			if (!current.equals(this.getPos())) {
-				ringPositions.add(current);
-				this.getWorld().setBlockState(current, state);
+			if (radiusError < 0) {
+				radiusError += 2 * y + 1;
+			} else {
+				x--;
+				radiusError += 2 * (y - x + 1);
 			}
-			current = current.offset(oppositeDirection);
-		}
-
-		// Move downwards to link back to the original corner
-		for (int i = 0; i < height; i++) {
-			if (!current.equals(this.getPos())) {
-				ringPositions.add(current);
-				this.getWorld().setBlockState(current, state);
-			}
-			current = current.down();
 		}
 
 		return ringPositions;
 	}
 
+	private void addCircleBlocks(BlockPos center, int x, int y, Set<BlockPos> ringPositions, BlockState state) {
+		World world = this.getWorld();
+
+		BlockPos[] positions = new BlockPos[]{
+				center.add(x, y, 0),
+				center.add(-x, y, 0),
+				center.add(x, -y, 0),
+				center.add(-x, -y, 0),
+				center.add(y, x, 0),
+				center.add(-y, x, 0),
+				center.add(y, -x, 0),
+				center.add(-y, -x, 0)
+		};
+
+		for (BlockPos pos : positions) {
+			if (!pos.equals(this.getPos())) {
+				ringPositions.add(pos);
+				world.setBlockState(pos, state);
+			}
+		}
+	}
 	/**
 	 * Removes the ring of "StargateRingBlock" around the stargate
 	 * @return the positions of the blocks removed

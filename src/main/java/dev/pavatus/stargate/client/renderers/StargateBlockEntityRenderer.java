@@ -25,10 +25,11 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
     @Override
     public void render(StargateBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
+        matrices.translate(0.5f, 2.65f, 0.5f);
         float k = entity.getCachedState().get(StargateBlock.FACING).asRotation();
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(k));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
+        matrices.scale(1.75f, 1.75f, 1.75f);
         Stargate.GateState state = entity.getStargate() != null ? entity.getGateState() : Stargate.GateState.CLOSED;
         this.model.animateStargateModel(entity, state, entity.age);
         int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up());
