@@ -1,12 +1,11 @@
 package dev.pavatus.stargate.client.models;
 
+import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.animation.Animation;
 import net.minecraft.client.render.entity.model.SinglePartEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 
@@ -23,7 +22,7 @@ public abstract class BaseStargateModel extends SinglePartEntityModel {
         super(function);
     }
 
-    public void animateStargateModel(StargateBlockEntity stargateBlockEntity, StargateBlockEntity.GateState state, int age) {
+    public void animateStargateModel(StargateBlockEntity stargateBlockEntity, Stargate.GateState state, int age) {
         this.getPart().traverse().forEach(ModelPart::resetTransform);
 
 
@@ -35,5 +34,5 @@ public abstract class BaseStargateModel extends SinglePartEntityModel {
                           float headPitch) {
     }
 
-    public abstract Animation getAnimationForState(StargateBlockEntity.GateState state);
+    public abstract Animation getAnimationForState(Stargate.GateState state);
 }

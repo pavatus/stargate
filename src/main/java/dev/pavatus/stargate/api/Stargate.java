@@ -12,13 +12,17 @@ public class Stargate implements StargateCall.Wiretap {
 	private final Address address;
 	private final List<Subscriber> subscribers;
 	private StargateCall call;
+	private GateState state;
 
 	protected Stargate(Address address) {
 		this.address = address;
 		this.subscribers = new ArrayList<>();
+		this.state = GateState.CLOSED;
 	}
 	protected Stargate(NbtCompound nbt) {
 		this(Address.fromNbt(nbt.getCompound("Address")));
+
+		this.loadNbt(nbt);
 	}
 
 	/**
@@ -80,6 +84,15 @@ public class Stargate implements StargateCall.Wiretap {
 		return address;
 	}
 
+	public GateState getState() {
+		return state;
+	}
+	public void setState(GateState state) {
+		GateState before = this.state;
+		this.state = state;
+		this.subscribers.forEach(s -> s.onStateChange(this, before, state));
+	}
+
 	@Override
 	public void onCallStart(StargateCall call) {
 		if (this.call != call) return;
@@ -120,12 +133,18 @@ public class Stargate implements StargateCall.Wiretap {
 		NbtCompound nbt = new NbtCompound();
 
 		nbt.put("Address", address.toNbt());
+		nbt.putInt("State", state.ordinal());
 
 		return nbt;
 	}
 
 	public static Stargate fromNbt(NbtCompound nbt) {
 		return new Stargate(nbt);
+	}
+	private void loadNbt(NbtCompound nbt) {
+		if (nbt.contains("State")) {
+			this.state = GateState.values()[nbt.getInt("State")];
+		}
 	}
 
 	public PacketByteBuf writeToPacket(PacketByteBuf buf) {
@@ -142,9 +161,16 @@ public class Stargate implements StargateCall.Wiretap {
 		return created;
 	}
 
+	public enum GateState {
+		CLOSED,
+		OPEN,
+		BROKEN
+	}
+
 	public interface Subscriber {
 		void onCallCreate(Stargate gate, StargateCall call);
 		void onCallStart(Stargate gate, StargateCall call);
 		void onCallEnd(Stargate gate, StargateCall call);
+		void onStateChange(Stargate gate, GateState before, GateState after);
 	}
 }

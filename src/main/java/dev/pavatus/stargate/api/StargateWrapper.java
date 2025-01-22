@@ -5,4 +5,10 @@ package dev.pavatus.stargate.api;
  */
 public interface StargateWrapper {
 	Stargate getStargate();
+	default void setGateState(Stargate.GateState state) {
+		getStargate().setState(state);
+	}
+	default Stargate.GateState getGateState() {
+		return getStargate().getState();
+	}
 }

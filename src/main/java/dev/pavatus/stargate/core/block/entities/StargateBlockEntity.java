@@ -1,6 +1,5 @@
 package dev.pavatus.stargate.core.block.entities;
 
-import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
@@ -13,7 +12,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.client.render.entity.animation.Animation;
 import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -24,8 +22,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -42,7 +38,6 @@ import java.util.Set;
 
 public class StargateBlockEntity extends BlockEntity implements StargateWrapper, BlockEntityTicker<StargateBlockEntity> {
 	private Stargate stargate;
-	private GateState gateState = GateState.CLOSED;
 	public AnimationState ANIM_STATE = new AnimationState();
 	private static final Identifier SYNC_GATE_STATE = new Identifier(StargateMod.MOD_ID, "sync_gate_state");
 	public int age;
@@ -53,7 +48,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 					if (client.world == null)
 						return;
 
-					StargateBlockEntity.GateState state = GateState.values()[buf.readInt()];
+					Stargate.GateState state = Stargate.GateState.values()[buf.readInt()];
 					BlockPos stargatePos = buf.readBlockPos();
 
 					if (client.world.getBlockEntity(stargatePos) instanceof StargateBlockEntity stargate)
@@ -75,13 +70,10 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		return this.stargate;
 	}
 
-	public GateState getGateState() {
-		return this.gateState;
-	}
-
-	public void setGateState(GateState state) {
+	@Override
+	public void setGateState(Stargate.GateState state) {
 		if (state.equals(this.getGateState())) return;
-		this.gateState = state;
+		this.getStargate().setState(state);
 
 		this.markDirty();
 		this.syncGateState();
@@ -116,9 +108,6 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		if (nbt.contains("Stargate")) {
 			this.stargate = Stargate.fromNbt(nbt.getCompound("Stargate"));
 			StargateNetwork.getInstance().add(this.stargate);
-		}
-		if (nbt.contains("GateState")) {
-			this.gateState = GateState.values()[nbt.getInt("GateState")];
 		}
 	}
 
@@ -273,9 +262,4 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		}*/
 	}
 
-	public enum GateState {
-		CLOSED,
-		OPEN,
-		BROKEN
-	}
 }

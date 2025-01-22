@@ -11,7 +11,7 @@ import net.minecraft.item.Item;
 
 public class StargateBlocks extends BlockContainer {
 	@PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-	public static final Block STARGATE = new StargateBlock(ABlockSettings.create());
+	public static final Block STARGATE = new StargateBlock(ABlockSettings.create().nonOpaque());
 	public static final Block RING = new StargateRingBlock(ABlockSettings.create().nonOpaque());
 
 	@Override

@@ -3,11 +3,9 @@ package dev.pavatus.stargate.api;
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.pavatus.lib.util.ServerLifecycleHooks;
-import dev.pavatus.stargate.core.block.StargateBlock;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +68,7 @@ public class StargateCall {
 		if (world == null) return;
 		if (!(world.getBlockEntity(address.pos().getPos()) instanceof StargateBlockEntity entity)) return;
 
-		entity.setGateState(open ? StargateBlockEntity.GateState.OPEN : StargateBlockEntity.GateState.CLOSED);
+		entity.setGateState(open ? Stargate.GateState.OPEN : Stargate.GateState.CLOSED);
 	}
 
 	/**
