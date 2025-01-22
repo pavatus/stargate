@@ -28,7 +28,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         float k = entity.getCachedState().get(StargateBlock.FACING).asRotation();
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(k));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
-        Stargate.GateState state = entity.getGateState();
+        Stargate.GateState state = entity.getStargate() != null ? entity.getGateState() : Stargate.GateState.CLOSED;
         this.model.animateStargateModel(entity, state, entity.age);
         int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up());
         this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutout(TEXTURE)), lightAbove, overlay, 1, 1, 1, 1);

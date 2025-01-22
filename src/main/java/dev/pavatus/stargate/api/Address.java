@@ -11,6 +11,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 
+import java.util.Objects;
+
 /**
  * Represents a Stargate address.
  * @param text address in string form
@@ -62,5 +64,21 @@ public record Address(String text, GlobalPos pos) {
 			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(26)));
 		}
 		return builder.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Address address = (Address) o;
+		return text.equals(address.text) && Objects.equals(pos, address.pos);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = text.hashCode();
+		result = 31 * result + Objects.hashCode(pos);
+		return result;
 	}
 }

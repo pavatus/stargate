@@ -39,12 +39,8 @@ public class Stargate implements StargateCall.Wiretap {
 	 * @return the call if successful
 	 */
 	public Optional<StargateCall> dial(Stargate target) {
-		if (this.address.pos().getDimension() == target.address.pos().getDimension() &&
-		this.address.pos().getPos().getX() == target.address.pos().getPos().getX() &&
-		this.address.pos().getPos().getY() == target.address.pos().getPos().getY() &&
-		this.address.pos().getPos().getZ() == target.address.pos().getPos().getZ()) {
+		if (this == target || this.address.equals(target.address)) {
 			// cannot call self
-
 			return Optional.empty();
 		}
 		if (!this.isAvailable()) {
@@ -72,7 +68,7 @@ public class Stargate implements StargateCall.Wiretap {
 	 * @return the call if successful
 	 */
 	public Optional<StargateCall> dial(Address target) {
-		return StargateNetwork.getInstance().getOptional(target)
+		return StargateNetwork.getInstance(true).getOptional(target)
 				.flatMap(this::dial);
 	}
 
@@ -116,7 +112,7 @@ public class Stargate implements StargateCall.Wiretap {
 		if (this.call != null) {
 			this.call.end();
 		}
-		StargateNetwork.getInstance().remove(this.address);
+		StargateNetwork.getInstance(true).remove(this.address);
 	}
 
 	/**
@@ -155,9 +151,18 @@ public class Stargate implements StargateCall.Wiretap {
 		return new Stargate(buf.readNbt());
 	}
 
+	@Override
+	public String toString() {
+		return "Stargate{" +
+				"address=" + address +
+				", call=" + call +
+				", state=" + state +
+				'}';
+	}
+
 	public static Stargate create(Address address) {
 		Stargate created = new Stargate(address);
-		StargateNetwork.getInstance().add(created);
+		StargateNetwork.getInstance(true).add(created);
 		return created;
 	}
 

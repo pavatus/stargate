@@ -5,6 +5,8 @@ import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
 import dev.pavatus.stargate.core.StargateBlocks;
 import dev.pavatus.stargate.core.block.StargateBlock;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -22,6 +24,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -63,8 +67,20 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 	@Override
 	public Stargate getStargate() {
 		if (this.stargate == null) {
-			this.stargate = Stargate.create(new Address(GlobalPos.create(this.getWorld().getRegistryKey(), this.getPos())));
-			StargateMod.LOGGER.info("Created stargate at {}", this.getPos());
+			// try to find existing
+			StargateNetwork network = StargateNetwork.getInstance(this.getWorld());
+			this.stargate = network.get(GlobalPos.create(this.getWorld().getRegistryKey(), this.getPos())).orElseGet(() -> {
+				if (!network.isServer()) return null;
+
+				return Stargate.create(new Address(GlobalPos.create(this.getWorld().getRegistryKey(), this.getPos())));
+			});
+
+			if (this.stargate == null) {
+				// owch
+				return null;
+			}
+
+			StargateMod.LOGGER.info("Created/Found stargate at {}", this.getPos());
 		}
 
 		return this.stargate;
@@ -105,9 +121,11 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 	public void readNbt(NbtCompound nbt) {
 		super.readNbt(nbt);
 
-		if (nbt.contains("Stargate")) {
+		if (nbt.contains("Stargate") && this.stargate == null && this.hasWorld()) {
 			this.stargate = Stargate.fromNbt(nbt.getCompound("Stargate"));
-			StargateNetwork.getInstance().add(this.stargate);
+
+			StargateMod.LOGGER.info("Loaded stargate ({}) at {}", this.stargate.getAddress(), this.getPos());
+			StargateNetwork.getInstance(this.getWorld()).add(this.stargate);
 		}
 	}
 
@@ -120,8 +138,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		Stargate chosen = this.getStargate();
 		int counter = 0;
 		while (chosen == this.getStargate() && counter < 10) {
-			chosen = StargateNetwork.getInstance().getRandom();
-			if (chosen == this.getStargate()) continue;
+			chosen = StargateNetwork.getInstance(world).getRandom();
 			counter++;
 		}
 
