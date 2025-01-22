@@ -3,6 +3,7 @@ package dev.pavatus.stargate.client.renderers;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.client.models.StargateModel;
+import dev.pavatus.stargate.client.portal.PortalRendering;
 import dev.pavatus.stargate.core.block.StargateBlock;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.client.render.RenderLayer;
@@ -32,6 +33,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         this.model.animateStargateModel(entity, state, entity.age);
         int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up());
         this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutout(TEXTURE)), lightAbove, overlay, 1, 1, 1, 1);
+        PortalRendering.renderPortal(entity, matrices, EMISSION, this.model.portal);
         if(state == Stargate.GateState.OPEN) this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, 1, 1, 1);
         matrices.pop();
     }

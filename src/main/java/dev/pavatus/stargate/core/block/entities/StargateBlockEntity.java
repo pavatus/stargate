@@ -32,12 +32,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class StargateBlockEntity extends BlockEntity implements StargateWrapper, BlockEntityTicker<StargateBlockEntity> {
@@ -273,10 +275,26 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 			return;
 		}
 		if (world.getServer() == null) return;
-		/*if (world.getServer().getTicks() % 20 == 0) {
-			StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
-			this.setGateState(existing != null && existing.to != this.getStargate() ? GateState.OPEN : GateState.CLOSED);
-		}*/
+
+		if (world.getServer().getTicks() % 20 == 0) {
+			// Define the bounding box
+			Box detectionBox = new Box(pos.getX() - 1, pos.getY() + 1, pos.getZ() - 1, pos.getX() + 2, pos.getY() + 3, pos.getZ() + 2);
+
+			// Find entities inside the bounding box
+			List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, detectionBox, e -> true);
+
+			for (LivingEntity entity : entities) {
+				// teleport the player to the stargate
+				StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
+				if (existing != null && existing.to != this.getStargate()) {
+					existing.to.teleportHere(entity);
+
+					if (entity instanceof ServerPlayerEntity player) {
+						player.sendMessage(Text.literal("HAVE A GOOD TRIP"), true);
+					}
+				}
+			}
+		}
 	}
 
 }
