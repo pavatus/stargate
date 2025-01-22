@@ -1,5 +1,6 @@
 package dev.pavatus.stargate.core.block.entities;
 
+import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
@@ -24,6 +25,7 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -143,29 +145,13 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		}
 
 		call.start();
-		this.setStateViaCall((ServerWorld) world, call, true);
 		player.sendMessage(Text.literal("CALL CONNECTED TO ").append(chosen.getAddress().toGlyphs()), true);
 
 		call.onEnd(c -> {
-			this.setStateViaCall((ServerWorld) world, c, false);
 			player.sendMessage(Text.literal("WORMHOLE CLOSED"), true);
 		});
 
 		return ActionResult.SUCCESS;
-	}
-
-	public void setStateViaCall(ServerWorld world, StargateCall call, boolean shouldOpen) {
-		World toWorld = world.getServer().getWorld(call.to.getAddress().pos().getDimension());
-		if (toWorld == null) return;
-		StargateBlockEntity entityTo = (StargateBlockEntity) toWorld.getBlockEntity(call.to.getAddress().pos().getPos());
-		if (entityTo == null) return;
-		entityTo.setGateState(shouldOpen ? GateState.OPEN : GateState.CLOSED);
-
-		World fromWorld = world.getServer().getWorld(call.from.getAddress().pos().getDimension());
-		if (fromWorld == null) return;
-		StargateBlockEntity entityFrom = (StargateBlockEntity) fromWorld.getBlockEntity(call.from.getAddress().pos().getPos());
-		if (entityFrom == null) return;
-		entityFrom.setGateState(shouldOpen ? GateState.OPEN : GateState.CLOSED);
 	}
 
 	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity e) {

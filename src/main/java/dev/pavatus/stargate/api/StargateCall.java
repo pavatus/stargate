@@ -2,8 +2,10 @@ package dev.pavatus.stargate.api;
 
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
+import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.stargate.core.block.StargateBlock;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
@@ -40,6 +42,7 @@ public class StargateCall {
 	}
 
 	public void start() {
+		this.setState(true);
 		Scheduler.get().runTaskLater(this::end, ttlUnits, ttl);
 
 		for (Wiretap tap : subscribers) {
@@ -48,9 +51,26 @@ public class StargateCall {
 	}
 
 	public void end() {
+		this.setState(false);
+
 		for (Wiretap tap : subscribers) {
 			tap.onCallEnd(this);
 		}
+	}
+
+	protected void setState(boolean open) {
+		MinecraftServer server = ServerLifecycleHooks.get();
+		if (server == null) return;
+
+		setState(server, this.to.getAddress(), open);
+		setState(server, this.from.getAddress(), open);
+	}
+	private static void setState(MinecraftServer server, Address address, boolean open) {
+		ServerWorld world = server.getWorld(address.pos().getDimension());
+		if (world == null) return;
+		if (!(world.getBlockEntity(address.pos().getPos()) instanceof StargateBlockEntity entity)) return;
+
+		entity.setGateState(open ? StargateBlockEntity.GateState.OPEN : StargateBlockEntity.GateState.CLOSED);
 	}
 
 	/**
