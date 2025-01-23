@@ -32,10 +32,20 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.scale(1.75f, 1.75f, 1.75f);
         Stargate.GateState state = entity.getStargate() != null ? entity.getGateState() : Stargate.GateState.CLOSED;
         this.model.animateStargateModel(entity, state, entity.age);
-        int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up());
+        int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up().up().up().up());
         this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutout(TEXTURE)), lightAbove, overlay, 1, 1, 1, 1);
-        PortalRendering.renderPortal(entity, matrices, EMISSION, this.model.portal);
-        if(state == Stargate.GateState.OPEN) this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, 1, 1, 1);
+        PortalRendering.renderPortal(entity, state, matrices, EMISSION, this.model.portal);
+        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, 1, 1, 1);
+        this.model.portal.visible =       state == Stargate.GateState.OPEN;
+        this.model.chevron_one.visible =  true;//state == Stargate.GateState.OPEN;
+        this.model.chevron_two.visible =  state == Stargate.GateState.OPEN;
+        this.model.chevron_three.visible= state == Stargate.GateState.OPEN;
+        this.model.chevron_four.visible = state == Stargate.GateState.OPEN;
+        this.model.chevron_five.visible = state == Stargate.GateState.OPEN;
+        this.model.chevron_six.visible =  state == Stargate.GateState.OPEN;
+        this.model.chevron_seven.visible =state == Stargate.GateState.OPEN;
+        this.model.chevron_eight.visible =state == Stargate.GateState.OPEN;
+        this.model.chevron_nine.visible = state == Stargate.GateState.OPEN;
         matrices.pop();
     }
 }

@@ -22,7 +22,7 @@ public class PortalRendering {
     public static PortalHandler PORTAL_HANDLER = new PortalHandler();
     public static StargateBufferBuilderStorage STARGATE_BUF_BUILDER_STORAGE = new StargateBufferBuilderStorage();
 
-    public static void renderPortal(StargateBlockEntity stargateBlockEntity, MatrixStack stack, Identifier frameTex, ModelPart mask) {
+    public static void renderPortal(StargateBlockEntity stargateBlockEntity, Stargate.GateState state, MatrixStack stack, Identifier frameTex, ModelPart mask) {
         if (MinecraftClient.getInstance().world == null
                 || MinecraftClient.getInstance().player == null) return;
 
@@ -48,9 +48,8 @@ public class PortalRendering {
 
         RenderSystem.depthMask(true);
         stack.push();
-        stack.translate(0, -1, 0.1);
+        stack.translate(0, -0.9, 0.05);
         stack.scale(1, 1, 1);
-        Stargate.GateState state = stargateBlockEntity.getStargate() != null ? stargateBlockEntity.getGateState() : Stargate.GateState.CLOSED;
         if (state != Stargate.GateState.OPEN)
             mask.render(stack, portalProvider.getBuffer(RenderLayer.getEndGateway()), 0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
         else {

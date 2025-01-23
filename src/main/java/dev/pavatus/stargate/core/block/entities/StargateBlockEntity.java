@@ -273,7 +273,14 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 
 		if (world.getServer().getTicks() % 20 == 0) {
 			// Define the bounding box
-			Box detectionBox = new Box(pos.getX() - 1, pos.getY() + 1, pos.getZ() - 1, pos.getX() + 2, pos.getY() + 3, pos.getZ() + 2);
+			Box detectionBox = new Box(
+					pos.getX() - 1 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.X ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? -1 : 1)),
+					pos.getY() + 1,
+					pos.getZ() - 1 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.Z ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? -1 : 1)),
+					pos.getX() + 3 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.X ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? 1 : -1)),
+					pos.getY() + 4,
+					pos.getZ() + 3 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.Z ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? 1 : -1))
+			);
 
 			// Find entities inside the bounding box
 			List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, detectionBox, e -> true);
