@@ -197,13 +197,14 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		int radius = 4; // Adjust the radius as needed
 		Set<BlockPos> ringPositions = new HashSet<>();
 		BlockPos center = this.getPos().up(radius);
+		Direction facing = this.getCachedState().get(StargateBlock.FACING);
 
 		int x = radius;
 		int y = 0;
 		int radiusError = 1 - x;
 
 		while (x >= y) {
-			addCircleBlocks(center, x, y, ringPositions, state);
+			addCircleBlocks(center, x, y, ringPositions, state, facing);
 			y++;
 
 			if (radiusError < 0) {
@@ -217,18 +218,18 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		return ringPositions;
 	}
 
-	private void addCircleBlocks(BlockPos center, int x, int y, Set<BlockPos> ringPositions, BlockState state) {
+	private void addCircleBlocks(BlockPos center, int x, int y, Set<BlockPos> ringPositions, BlockState state, Direction facing) {
 		World world = this.getWorld();
 
 		BlockPos[] positions = new BlockPos[]{
-				center.add(x, y, 0),
-				center.add(-x, y, 0),
-				center.add(x, -y, 0),
-				center.add(-x, -y, 0),
-				center.add(y, x, 0),
-				center.add(-y, x, 0),
-				center.add(y, -x, 0),
-				center.add(-y, -x, 0)
+				center.add(rotate(x, y, facing)),
+				center.add(rotate(-x, y, facing)),
+				center.add(rotate(x, -y, facing)),
+				center.add(rotate(-x, -y, facing)),
+				center.add(rotate(y, x, facing)),
+				center.add(rotate(-y, x, facing)),
+				center.add(rotate(y, -x, facing)),
+				center.add(rotate(-y, -x, facing))
 		};
 
 		for (BlockPos pos : positions) {
@@ -237,6 +238,16 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 				world.setBlockState(pos, state);
 			}
 		}
+	}
+
+	private BlockPos rotate(int x, int y, Direction facing) {
+		return switch (facing) {
+			case NORTH -> new BlockPos(x, y, 0);
+			case SOUTH -> new BlockPos(-x, y, 0);
+			case WEST -> new BlockPos(0, y, x);
+			case EAST -> new BlockPos(0, y, -x);
+			default -> BlockPos.ORIGIN;
+		};
 	}
 	/**
 	 * Removes the ring of "StargateRingBlock" around the stargate
