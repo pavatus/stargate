@@ -1,5 +1,6 @@
 package dev.pavatus.stargate.api;
 
+import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.stargate.StargateMod;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
@@ -8,6 +9,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 
@@ -18,7 +20,7 @@ import java.util.Objects;
  * @param text address in string form
  * @param pos the position of the Stargate
  */
-public record Address(String text, GlobalPos pos) {
+public record Address(String text, DirectedGlobalPos pos) {
 	private static final Identifier FONT_ID = new Identifier("minecraft", "alt");
 	private static final Style STYLE = Style.EMPTY.withFont(FONT_ID);
 
@@ -26,7 +28,7 @@ public record Address(String text, GlobalPos pos) {
 	 * Creates a new address with a random string of characters.
 	 * @param pos the position of the Stargate
 	 */
-	public Address(GlobalPos pos) {
+	public Address(DirectedGlobalPos pos) {
 		this(randomAddress(), pos);
 	}
 
@@ -42,8 +44,7 @@ public record Address(String text, GlobalPos pos) {
 
 		nbt.putString("Text", text);
 
-		nbt.put("Position", NbtHelper.fromBlockPos(pos.getPos()));
-		nbt.putString("Dimension", pos.getDimension().getValue().toString());
+		nbt.put("Position", pos.toNbt());
 
 		return nbt;
 	}
@@ -51,9 +52,7 @@ public record Address(String text, GlobalPos pos) {
 	public static Address fromNbt(NbtCompound nbt) {
 		String text = nbt.getString("Text");
 
-		RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD,
-				new Identifier(nbt.getString("Dimension")));
-		GlobalPos pos = GlobalPos.create(dimension, NbtHelper.toBlockPos(nbt.getCompound("Position")));
+		DirectedGlobalPos pos = DirectedGlobalPos.fromNbt(nbt.getCompound("Position"));
 
 		return new Address(text, pos);
 	}

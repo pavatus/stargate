@@ -1,5 +1,6 @@
 package dev.pavatus.stargate.api;
 
+import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.lib.util.ServerLifecycleHooks;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.LivingEntity;
@@ -7,25 +8,22 @@ import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 
 import java.util.Set;
 
 public class TeleportUtil {
-	public static void teleport(LivingEntity entity, GlobalPos pos) {
-		teleport(entity, ServerLifecycleHooks.get().getWorld(pos.getDimension()), pos.getPos().toCenterPos(), entity.getHorizontalFacing());
+	public static void teleport(LivingEntity entity, DirectedGlobalPos pos) {
+		teleport(entity, ServerLifecycleHooks.get().getWorld(pos.getDimension()), pos.getPos().toCenterPos(), RotationPropertyHelper.toDegrees(pos.getRotation())-45);
 	}
-	public static void teleport(LivingEntity entity, ServerWorld world, Vec3d pos, Direction direction) {
+	public static void teleport(LivingEntity entity, ServerWorld world, Vec3d pos, float yaw) {
 		world.getServer().execute(() -> {
 			if (entity instanceof ServerPlayerEntity player) {
-				teleportPlayer(player, world, pos, direction.asRotation(), player.getPitch());
+				teleportPlayer(player, world, pos, yaw, player.getPitch());
 				return;
 			}
 
-			teleportNonPlayer(entity, world, pos, direction.asRotation(), entity.getPitch());
+			teleportNonPlayer(entity, world, pos, yaw, entity.getPitch());
 		});
 	}
 	private static void teleportPlayer(ServerPlayerEntity player, ServerWorld world, Vec3d pos, float yaw, float pitch) {

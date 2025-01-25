@@ -1,8 +1,12 @@
 package dev.pavatus.stargate.api;
 
+import dev.pavatus.lib.data.DirectedGlobalPos;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.RotationPropertyHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +125,9 @@ public class Stargate implements StargateCall.Wiretap {
 	 * @return whether the teleport was successful
 	 */
 	public boolean teleportHere(LivingEntity entity) {
-		TeleportUtil.teleport(entity, this.getAddress().pos());
+		DirectedGlobalPos pos = this.getAddress().pos();
+		BlockPos offset = pos.getPos().offset(Direction.fromRotation(RotationPropertyHelper.toDegrees(pos.getRotation())-45));
+		TeleportUtil.teleport(entity, pos.pos(offset));
 		return true;
 	}
 

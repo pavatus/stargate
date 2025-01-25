@@ -27,7 +27,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.push();
         matrices.translate(0.5f, 2.65f, 0.5f);
         float k = entity.getCachedState().get(StargateBlock.FACING).asRotation();
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(k));
+        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(k));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
         matrices.scale(1.75f, 1.75f, 1.75f);
         Stargate.GateState state = entity.getStargate() != null ? entity.getGateState() : Stargate.GateState.CLOSED;

@@ -1,5 +1,6 @@
 package dev.pavatus.stargate.core.block.entities;
 
+import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
@@ -31,10 +32,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.GlobalPos;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,7 +72,8 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 			this.stargate = network.get(GlobalPos.create(this.getWorld().getRegistryKey(), this.getPos())).orElseGet(() -> {
 				if (!network.isServer()) return null;
 
-				return Stargate.create(new Address(GlobalPos.create(this.getWorld().getRegistryKey(), this.getPos())));
+				Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
+				return Stargate.create(new Address(DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), (byte) ((RotationPropertyHelper.fromDirection(facing) + 2) % 16))));
 			});
 
 			if (this.stargate == null) {
