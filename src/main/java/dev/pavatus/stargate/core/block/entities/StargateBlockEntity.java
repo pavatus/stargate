@@ -73,7 +73,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 				if (!network.isServer()) return null;
 
 				Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
-				return Stargate.create(new Address(DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), (byte) ((RotationPropertyHelper.fromDirection(facing) + 2) % 16))));
+				return Stargate.create(new Address(DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing))));
 			});
 
 			if (this.stargate == null) {
