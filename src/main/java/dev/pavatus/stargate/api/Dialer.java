@@ -156,6 +156,30 @@ public class Dialer {
 
 		this.internalDial(address, unit, delay, 0);
 	}
+
+	/**
+	 * Dials the target glyph over a period of time
+	 * @param target the target glyph
+	 * @param unit units of time
+	 * @param delay the amount of delay between each glyph being appended
+	 */
+	public void dial(char target, TimeUnit unit, long delay) {
+		this.internalDial(target, unit, delay);
+	}
+	private void internalDial(char target, TimeUnit unit, long delay) {
+		if (this.selected != target) {
+			this.rotateTowards(target);
+		} else {
+			int length = this.target.length();
+
+			this.lock();
+
+			if (length == 6) return;
+		}
+
+		Scheduler.get().runTaskLater(() -> this.internalDial(target, unit, delay), unit, delay);
+	}
+
 	private void internalDial(Address address, TimeUnit unit, long delay, int i) {
 		if (i == 7) return;
 
