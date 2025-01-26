@@ -197,7 +197,8 @@ public class Stargate implements StargateCall.Wiretap {
 	public enum GateState {
 		CLOSED,
 		OPEN,
-		BROKEN
+		PREOPEN,
+			BROKEN
 	}
 
 	public interface Subscriber {

@@ -41,7 +41,7 @@ public class StargateCall {
 	}
 
 	public void start() {
-		this.setState(true);
+		this.setState(Stargate.GateState.PREOPEN);
 		Scheduler.get().runTaskLater(this::end, ttlUnits, ttl);
 
 		for (Wiretap tap : subscribers) {
@@ -50,32 +50,34 @@ public class StargateCall {
 
 		this.to.playSound(StargateSounds.GATE_OPEN, 0.25f, 1f);
 		this.from.playSound(StargateSounds.GATE_OPEN, 0.25f, 1f);
+
+		Scheduler.get().runTaskLater(() -> this.setState(Stargate.GateState.OPEN), TimeUnit.TICKS, (long) (20 * 1.725)); // wait for sfx
 	}
 
 	public void end() {
-		this.setState(false);
-
 		for (Wiretap tap : subscribers) {
 			tap.onCallEnd(this);
 		}
 
 		this.to.playSound(StargateSounds.GATE_CLOSE, 0.25f, 1f);
 		this.from.playSound(StargateSounds.GATE_CLOSE, 0.25f, 1f);
+
+		Scheduler.get().runTaskLater(() -> this.setState(Stargate.GateState.CLOSED), TimeUnit.TICKS, (long) (20 * 1.1));
 	}
 
-	protected void setState(boolean open) {
+	protected void setState(Stargate.GateState state) {
 		MinecraftServer server = ServerLifecycleHooks.get();
 		if (server == null) return;
 
-		setState(server, this.to.getAddress(), open);
-		setState(server, this.from.getAddress(), open);
+		setState(server, this.to.getAddress(), state);
+		setState(server, this.from.getAddress(), state);
 	}
-	private static void setState(MinecraftServer server, Address address, boolean open) {
+	private static void setState(MinecraftServer server, Address address, Stargate.GateState state) {
 		ServerWorld world = server.getWorld(address.pos().getDimension());
 		if (world == null) return;
 		if (!(world.getBlockEntity(address.pos().getPos()) instanceof StargateBlockEntity entity)) return;
 
-		entity.setGateState(open ? Stargate.GateState.OPEN : Stargate.GateState.CLOSED);
+		entity.setGateState(state);
 	}
 
 	/**

@@ -2,6 +2,7 @@ package dev.pavatus.stargate.api;
 
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
+import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
@@ -64,7 +65,7 @@ public abstract class StargateNetwork {
 	public Optional<Stargate> getOptional(Address address) {
 		return Optional.ofNullable(this.get(address));
 	}
-	public Optional<Stargate> get(GlobalPos pos) {
+	public Optional<Stargate> get(DirectedGlobalPos pos) {
 		// find an address that matches
 		return lookup.keySet().stream()
 				.filter(address -> address.pos().equals(pos))

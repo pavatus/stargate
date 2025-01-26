@@ -70,11 +70,13 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		if (this.stargate == null) {
 			// try to find existing
 			StargateNetwork network = StargateNetwork.getInstance(this.getWorld());
-			this.stargate = network.get(GlobalPos.create(this.getWorld().getRegistryKey(), this.getPos())).orElseGet(() -> {
+			Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
+			DirectedGlobalPos globalPos = DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing));
+
+			this.stargate = network.get(globalPos).orElseGet(() -> {
 				if (!network.isServer()) return null;
 
-				Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
-				return Stargate.create(new Address(DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing))));
+				return Stargate.create(new Address(globalPos));
 			});
 
 			if (this.stargate == null) {
@@ -285,6 +287,8 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		if (world.getServer() == null) return;
 
 		if (world.getServer().getTicks() % 20 == 0) {
+			if (this.getStargate().getState() != Stargate.GateState.OPEN) return;
+
 			// Define the bounding box
 			Box detectionBox = new Box(
 					pos.getX() - 1 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.X ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? -1 : 1)),
