@@ -119,13 +119,19 @@ public class Dialer {
 	public char next() {
 		int index = this.getSelectedIndex();
 		this.selected = GLYPHS[(index + 1) % GLYPHS.length];
+
 		this.parent.sync();
+		this.parent.playSound(StargateSounds.RING_LOOP, 1.25f, StargateMod.RANDOM.nextFloat(1.0f, 1.25f));
+
 		return this.selected;
 	}
 	public char previous() {
 		int index = this.getSelectedIndex();
 		this.selected = GLYPHS[(index + GLYPHS.length - 1) % GLYPHS.length];
+
 		this.parent.sync();
+		this.parent.playSound(StargateSounds.RING_LOOP, 1.25f, StargateMod.RANDOM.nextFloat(1.0f, 1.25f));
+
 		return this.selected;
 	}
 
