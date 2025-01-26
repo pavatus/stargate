@@ -104,10 +104,6 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
 		if (existing != null && existing.to != this.getStargate()) {
 			existing.to.teleportHere(entity);
-
-			if (entity instanceof ServerPlayerEntity player) {
-				player.sendMessage(Text.literal("HAVE A GOOD TRIP"), true);
-			}
 		}
 	}
 

@@ -15,6 +15,7 @@ import net.minecraft.sound.SoundEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class Stargate implements StargateCall.Wiretap, Disposable {
 	private final Address address;
@@ -48,7 +49,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	 * @param target star gate to call
 	 * @return the call if successful
 	 */
-	public Optional<StargateCall> dial(Stargate target) {
+	public Optional<StargateCall> dialImmediately(Stargate target) {
 		if (this == target || this.address.equals(target.address)) {
 			// cannot call self
 			return Optional.empty();
@@ -71,6 +72,35 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		this.sync();
 
 		return Optional.of(this.call);
+	}
+
+	public void dial(Stargate target, Consumer<Optional<StargateCall>> callback) {
+		this.dialer.dial(target.getAddress());
+
+		this.subscribe(new Subscriber() {
+			@Override
+			public void onCallCreate(Stargate gate, StargateCall call) {
+
+			}
+
+			@Override
+			public void onCallStart(Stargate gate, StargateCall call) {
+				callback.accept(Optional.of(call));
+			}
+
+			@Override
+			public void onCallEnd(Stargate gate, StargateCall call) {
+			}
+
+			@Override
+			public void onStateChange(Stargate gate, GateState before, GateState after) {
+
+			}
+		});
+	}
+
+	public void dial(Stargate target) {
+		this.dial(target, call -> {});
 	}
 
 	public Optional<StargateCall> getCurrentCall() {
@@ -214,6 +244,10 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		OPEN,
 		PREOPEN,
 		BROKEN
+	}
+
+	public void subscribe(Subscriber subscriber) {
+		this.subscribers.add(subscriber);
 	}
 
 	public interface Subscriber {

@@ -7,8 +7,14 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -52,4 +58,23 @@ public class DHDBlock extends HorizontalFacingBlock implements BlockEntityProvid
 				dhd.tick(world, blockPos, blockState, dhd);
 		};
 	}
+
+	@Override
+	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+		if (world.getBlockEntity(pos) instanceof DHDBlockEntity be) {
+			be.onPlaced(world, pos, state, placer, itemStack);
+		}
+
+		super.onPlaced(world, pos, state, placer, itemStack);
+	}
+
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		if (world.getBlockEntity(pos) instanceof DHDBlockEntity be && hand == Hand.MAIN_HAND) {
+			return be.onUse(state, world, pos, player);
+		}
+
+		return super.onUse(state, world, pos, player, hand, hit);
+	}
+
 }

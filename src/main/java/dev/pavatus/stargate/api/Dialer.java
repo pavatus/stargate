@@ -1,5 +1,7 @@
 package dev.pavatus.stargate.api;
 
+import dev.drtheo.scheduler.api.Scheduler;
+import dev.drtheo.scheduler.api.TimeUnit;
 import dev.pavatus.stargate.core.StargateSounds;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
@@ -55,7 +57,7 @@ public class Dialer {
 			return Optional.empty();
 		}
 
-		return source.dial(target);
+		return source.dialImmediately(target);
 	}
 
 	protected void append(char c) {
@@ -73,7 +75,6 @@ public class Dialer {
 	public String clear() {
 		String old = this.target;
 		this.target = "";
-		this.selected = GLYPHS[0];
 		this.parent.sync();
 		return old;
 	}
@@ -136,5 +137,40 @@ public class Dialer {
 		nbt.putString("Target", this.target);
 		nbt.putString("Selected", String.valueOf(this.selected));
 		return nbt;
+	}
+
+	/**
+	 * Dials the target address over a period of time
+	 * @param address the address to dial
+	 * @param unit units of time
+	 * @param delay the amount of delay between each glyph being appended
+	 */
+	public void dial(Address address, TimeUnit unit, long delay) {
+		this.clear();
+
+		this.internalDial(address, unit, delay, 0);
+	}
+	private void internalDial(Address address, TimeUnit unit, long delay, int i) {
+		if (i == 7) return;
+
+		if (this.selected != address.text().charAt(i)) {
+			this.next();
+		} else {
+			this.lock();
+			i++;
+		}
+
+		if (this.isComplete()) return;
+
+		int finalI = i;
+		Scheduler.get().runTaskLater(() -> this.internalDial(address, unit, delay, finalI), unit, delay);
+	}
+
+	/**
+	 * Dials the target address over a period of time
+	 * @param address the address to dial
+	 */
+	public void dial(Address address) {
+		this.dial(address, TimeUnit.TICKS, 10);
 	}
 }

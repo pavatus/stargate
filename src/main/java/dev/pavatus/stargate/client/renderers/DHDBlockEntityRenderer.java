@@ -29,8 +29,8 @@ public class DHDBlockEntityRenderer implements BlockEntityRenderer<DHDBlockEntit
     public void render(DHDBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
-        float k = entity.getCachedState().get(DHDBlock.FACING).asRotation();
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(k));
+        float k = entity.getCachedState().get(StargateBlock.FACING).asRotation();
+        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(k));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
         //Stargate.GateState state = entity.getStargate() != null ? entity.getGateState() : Stargate.GateState.CLOSED;
         this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutout(TEXTURE)), light, overlay, 1, 1, 1, 1);

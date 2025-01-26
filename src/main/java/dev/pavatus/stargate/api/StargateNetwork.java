@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,6 +99,27 @@ public abstract class StargateNetwork {
 	public Stargate getRandom() {
 		int chosen = (int) (Math.random() * lookup.size());
 		return (Stargate) lookup.values().toArray()[chosen];
+	}
+
+	/**
+	 * Gets the nearest Stargate to the source within the given radius.
+	 * @param source the source position
+	 * @param radius the radius to search within
+	 * @return the nearest Stargate, if one exists
+	 */
+	public Optional<Stargate> getNearTo(GlobalPos source, int radius) {
+		for (Stargate gate : this.lookup.values()) {
+			DirectedGlobalPos pos = gate.getAddress().pos();
+
+			if (pos.getDimension() != source.getDimension()) continue;
+
+			// check if the blockpos is within radius
+			if (pos.getPos().isWithinDistance(source.getPos(), radius)) {
+				return Optional.of(gate);
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	public NbtCompound toNbt() {
