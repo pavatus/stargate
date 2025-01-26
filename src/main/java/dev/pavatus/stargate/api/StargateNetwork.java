@@ -1,33 +1,24 @@
 package dev.pavatus.stargate.api;
 
-import dev.drtheo.scheduler.api.Scheduler;
-import dev.drtheo.scheduler.api.TimeUnit;
 import dev.pavatus.lib.data.DirectedGlobalPos;
-import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.stargate.StargateMod;
-import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A list of all the known addresses and their corresponding Stargates.
- * todo - saving/loading
  */
 public abstract class StargateNetwork {
 	public static Identifier PACKET = StargateMod.id("sync_books");
@@ -77,6 +68,13 @@ public abstract class StargateNetwork {
 				.filter(address -> address.text().equals(text))
 				.findFirst();
 	}
+	public @Nullable Stargate get(String address) {
+		Address addr = lookup.keySet().stream()
+				.filter(a -> a.text().equals(address))
+				.findFirst().orElse(null);
+
+		return addr == null ? null : this.get(addr);
+	}
 
 	/**
 	 * Gets the Stargate associated with the address, or adds it if it doesn't exist.
@@ -111,18 +109,53 @@ public abstract class StargateNetwork {
 
 		return nbt;
 	}
-	public StargateNetwork fromNbt(NbtCompound nbt) {
-		this.lookup.clear();
-		NbtList list = nbt.getList("Stargates", 10);
+	public StargateNetwork fromNbt(NbtCompound nbt, boolean clear) {
+		if (clear) {
+			this.lookup.clear();
+		}
+		NbtList list = nbt.getList("Stargates", NbtElement.COMPOUND_TYPE);
 		list.forEach(tag -> {
-			Stargate stargate = Stargate.fromNbt((NbtCompound) tag);
-			lookup.put(stargate.getAddress(), stargate);
+			Stargate stargate = this.fromNbt((NbtCompound) tag);
+			this.lookup.put(stargate.getAddress(), stargate);
 		});
 		return this;
+	}
+	protected <T extends Stargate> T fromNbt(NbtCompound nbt) {
+		return (T) new Stargate(nbt);
+	}
+
+	public static <C, R> R with(BlockEntity entity, ContextManager<C, R> consumer) {
+		return StargateNetwork.with(entity.getWorld(), consumer);
+	}
+
+	public static <C, R> R with(Entity entity, ContextManager<C, R> consumer) {
+		return StargateNetwork.with(entity.getWorld(), consumer);
+	}
+
+	public static <C, R> R with(World world, ContextManager<C, R> consumer) {
+		return StargateNetwork.with(world.isClient(), consumer, world::getServer);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <C, R> R with(boolean isClient, ContextManager<C, R> consumer, Supplier<MinecraftServer> server) {
+		StargateNetwork manager = StargateNetwork.getInstance(!isClient);
+
+		if (isClient) {
+			return consumer.run((C) MinecraftClient.getInstance(), manager);
+		} else {
+			return consumer.run((C) server.get(), manager);
+		}
 	}
 
 	public boolean isServer() {
 		return this instanceof ServerStargateNetwork;
+	}
+
+	@Override
+	public String toString() {
+		return "StargateNetwork{" +
+				"lookup=" + lookup +
+				'}';
 	}
 
 	public static StargateNetwork getInstance(boolean isServer) {
@@ -130,5 +163,9 @@ public abstract class StargateNetwork {
 	}
 	public static StargateNetwork getInstance(World world) {
 		return getInstance(!world.isClient());
+	}
+	@FunctionalInterface
+	public interface ContextManager<C, R> {
+		R run(C c, StargateNetwork manager);
 	}
 }

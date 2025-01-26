@@ -36,8 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class StargateBlockEntity extends BlockEntity implements StargateWrapper, BlockEntityTicker<StargateBlockEntity> {
-	private Stargate stargate;
+public class StargateBlockEntity extends StargateLinkableBlockEntity implements StargateWrapper, BlockEntityTicker<StargateBlockEntity> {
 	public AnimationState ANIM_STATE = new AnimationState();
 	private static final Identifier SYNC_GATE_STATE = new Identifier(StargateMod.MOD_ID, "sync_gate_state");
 	public int age;
@@ -61,42 +60,9 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 	}
 
 	@Override
-	public Stargate getStargate() {
-		if (this.stargate == null) {
-			// try to find existing
-			StargateNetwork network = StargateNetwork.getInstance(this.getWorld());
-			Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
-			DirectedGlobalPos globalPos = DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing));
-
-			this.stargate = network.get(globalPos).orElseGet(() -> {
-				if (!network.isServer()) return null;
-
-				return Stargate.create(new Address(globalPos));
-			});
-
-			if (this.stargate == null) {
-				// owch
-				return null;
-			}
-
-			StargateMod.LOGGER.info("Created/Found stargate at {}", this.getPos());
-			this.markDirty();
-		}
-
-		return this.stargate;
-	}
-
-	@Override
 	public void setGateState(Stargate.GateState state) {
-		if (state.equals(this.getGateState())) return;
-		this.getStargate().setState(state);
-
-		this.markDirty();
+		super.setGateState(state);
 		this.syncGateState();
-
-		if (this.getWorld() instanceof ServerWorld serverWorld) {
-			serverWorld.getChunkManager().markForUpdate(this.pos);
-		}
 	}
 
 	@Nullable @Override
@@ -107,30 +73,6 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 	@Override
 	public NbtCompound toInitialChunkDataNbt() {
 		return createNbt();
-	}
-
-	@Override
-	protected void writeNbt(NbtCompound nbt) {
-		super.writeNbt(nbt);
-
-		nbt.put("Stargate", this.getStargate().toNbt());
-	}
-
-	@Override
-	public void readNbt(NbtCompound nbt) {
-		super.readNbt(nbt);
-
-		if (nbt.contains("Stargate") && this.hasWorld()) {
-			if (this.stargate != null) {
-				this.stargate.dispose();
-				this.stargate = null;
-			}
-
-			this.stargate = Stargate.fromNbt(nbt.getCompound("Stargate"));
-
-			StargateMod.LOGGER.info("Loaded stargate ({}) at {}", this.stargate.getAddress(), this.getPos());
-			StargateNetwork.getInstance(this.getWorld()).add(this.stargate);
-		}
 	}
 
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player) {
@@ -171,13 +113,17 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 
 	public void onBreak() {
 		this.getStargate().dispose();
-		this.stargate = null;
+		this.ref = null;
 		this.removeRing();
 	}
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		if (world.isClient()) return;
 
 		createRing(StargateBlocks.RING.getDefaultState());
+
+		Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
+		DirectedGlobalPos globalPos = DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing));
+		this.setStargate(Stargate.create(new Address(globalPos)));
 	}
 
 	/**
@@ -233,7 +179,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		}
 	}
 
-	private BlockPos rotate(int x, int y, Direction facing) {
+	public static BlockPos rotate(int x, int y, Direction facing) {
 		return switch (facing) {
 			case NORTH -> new BlockPos(x, y, 0);
 			case SOUTH -> new BlockPos(-x, y, 0);
@@ -276,6 +222,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		if (world.getServer() == null) return;
 
 		if (world.getServer().getTicks() % 20 == 0) {
+			if (this.getStargate() == null) return;
 			if (this.getStargate().getState() != Stargate.GateState.OPEN) return;
 
 			// Define the bounding box

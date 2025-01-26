@@ -11,19 +11,23 @@ import java.util.function.Consumer;
  * For tracking a dialing sequence in progress
  */
 public class Dialer {
-	private static final char[] GLYPHS = "ABCDEFG".toCharArray();
+	public static final char[] GLYPHS = "ABCDEFGHIJK".toCharArray();
+	private final Stargate parent;
 	private String target;
 	private char selected;
 	private List<Consumer<Dialer>> subscribers;
 
-	public Dialer() {
+	public Dialer(Stargate parent) {
 		this.selected = GLYPHS[0];
 		this.target = "";
 		this.subscribers = new ArrayList<>();
+		this.parent = parent;
 	}
-	public Dialer(NbtCompound nbt) {
-		this();
+	public Dialer(Stargate parent, NbtCompound nbt) {
+		this(parent);
+
 		this.target = nbt.getString("Target");
+		this.selected = nbt.getString("Selected").charAt(0);
 	}
 
 	/**
@@ -61,6 +65,8 @@ public class Dialer {
 			if (this.isComplete()) {
 				this.subscribers.forEach(consumer -> consumer.accept(this));
 			}
+
+			this.parent.sync();
 		}
 	}
 
@@ -68,6 +74,7 @@ public class Dialer {
 		String old = this.target;
 		this.target = "";
 		this.selected = GLYPHS[0];
+		this.parent.sync();
 		return old;
 	}
 
@@ -105,11 +112,13 @@ public class Dialer {
 	public char next() {
 		int index = this.getSelectedIndex();
 		this.selected = GLYPHS[(index + 1) % GLYPHS.length];
+		this.parent.sync();
 		return this.selected;
 	}
 	public char previous() {
 		int index = this.getSelectedIndex();
 		this.selected = GLYPHS[(index + GLYPHS.length - 1) % GLYPHS.length];
+		this.parent.sync();
 		return this.selected;
 	}
 
@@ -125,6 +134,7 @@ public class Dialer {
 	public NbtCompound toNbt() {
 		NbtCompound nbt = new NbtCompound();
 		nbt.putString("Target", this.target);
+		nbt.putString("Selected", String.valueOf(this.selected));
 		return nbt;
 	}
 }

@@ -40,7 +40,7 @@ public record Address(String text, DirectedGlobalPos pos) {
 		return toGlyphs(text);
 	}
 
-	public Text toGlyphs(String text) {
+	public static Text toGlyphs(String text) {
 		return Text.literal(text).fillStyle(STYLE);
 	}
 
@@ -75,7 +75,7 @@ public record Address(String text, DirectedGlobalPos pos) {
 		if (o == null || getClass() != o.getClass()) return false;
 
 		Address address = (Address) o;
-		return text.equals(address.text) && Objects.equals(pos, address.pos);
+		return text.equals(address.text);
 	}
 
 	@Override

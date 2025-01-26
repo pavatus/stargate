@@ -11,15 +11,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationPropertyHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class Stargate implements StargateCall.Wiretap {
+public class Stargate implements StargateCall.Wiretap, Disposable {
 	private final Address address;
 	private final List<Subscriber> subscribers;
 	private StargateCall call;
@@ -30,9 +27,9 @@ public class Stargate implements StargateCall.Wiretap {
 		this.address = address;
 		this.subscribers = new ArrayList<>();
 		this.state = GateState.CLOSED;
-		this.dialer = new Dialer().onCompleted(this::handleDialerComplete);
+		this.dialer = new Dialer(this).onCompleted(this::handleDialerComplete);
 	}
-	protected Stargate(NbtCompound nbt) {
+	public Stargate(NbtCompound nbt) {
 		this(Address.fromNbt(nbt.getCompound("Address")));
 
 		this.loadNbt(nbt);
@@ -71,18 +68,9 @@ public class Stargate implements StargateCall.Wiretap {
 
 		this.subscribers.forEach(s -> s.onCallCreate(this, this.call));
 
-		return Optional.of(this.call);
-	}
+		this.sync();
 
-	/**
-	 * Attempts to call another stargate
-	 * This creates and links a call, but does not start it.
-	 * @param target address to call
-	 * @return the call if successful
-	 */
-	public Optional<StargateCall> dial(Address target) {
-		return StargateNetwork.getInstance(true).getOptional(target)
-				.flatMap(this::dial);
+		return Optional.of(this.call);
 	}
 
 	public Optional<StargateCall> getCurrentCall() {
@@ -104,6 +92,7 @@ public class Stargate implements StargateCall.Wiretap {
 		GateState before = this.state;
 		this.state = state;
 		this.subscribers.forEach(s -> s.onStateChange(this, before, state));
+		this.sync();
 	}
 
 	@Override
@@ -125,6 +114,7 @@ public class Stargate implements StargateCall.Wiretap {
 	/**
 	 * Disposes of the stargate, unlinks it from everything and prepares it for garbage collection
 	 */
+	@Override
 	public void dispose() {
 		if (this.call != null) {
 			this.call.end();
@@ -169,6 +159,10 @@ public class Stargate implements StargateCall.Wiretap {
 		call.start();
 	}
 
+	public void sync() {
+		ServerStargateNetwork.getInstance().sync(this);
+	}
+
 	public NbtCompound toNbt() {
 		NbtCompound nbt = new NbtCompound();
 
@@ -182,13 +176,13 @@ public class Stargate implements StargateCall.Wiretap {
 	public static Stargate fromNbt(NbtCompound nbt) {
 		return new Stargate(nbt);
 	}
-	private void loadNbt(NbtCompound nbt) {
+	public void loadNbt(NbtCompound nbt) {
 		if (nbt.contains("State")) {
 			this.state = GateState.values()[nbt.getInt("State")];
 		}
 
 		if (nbt.contains("Dialer")) {
-			this.dialer = new Dialer(nbt.getCompound("Dialer")).onCompleted(this::handleDialerComplete);
+			this.dialer = new Dialer(this, nbt.getCompound("Dialer")).onCompleted(this::handleDialerComplete);
 		}
 	}
 

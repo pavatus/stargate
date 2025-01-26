@@ -1,6 +1,9 @@
 package dev.pavatus.stargate;
 
 import dev.pavatus.lib.container.RegistryContainer;
+import dev.pavatus.stargate.api.ServerStargateNetwork;
+import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.api.StargateServerData;
 import dev.pavatus.stargate.core.*;
 import net.fabricmc.api.ModInitializer;
 
@@ -23,6 +26,8 @@ public class StargateMod implements ModInitializer {
 		RegistryContainer.register(StargateBlockEntities.class, MOD_ID);
 		RegistryContainer.register(StargateEntities.class, MOD_ID);
 		RegistryContainer.register(StargateSounds.class, MOD_ID);
+
+		StargateServerData.init();
 	}
 
 	public static Identifier id(String path) {

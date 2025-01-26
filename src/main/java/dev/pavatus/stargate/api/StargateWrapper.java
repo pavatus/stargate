@@ -11,4 +11,6 @@ public interface StargateWrapper {
 	default Stargate.GateState getGateState() {
 		return getStargate().getState();
 	}
+
+	void setStargate(Stargate gate);
 }
