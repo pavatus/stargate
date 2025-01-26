@@ -9,10 +9,13 @@ public interface StargateWrapper {
 		getStargate().setState(state);
 	}
 	default Stargate.GateState getGateState() {
-		if (getStargate() == null) return Stargate.GateState.CLOSED;
+		if (!this.hasStargate()) return Stargate.GateState.CLOSED;
 
 		return getStargate().getState();
 	}
 
 	void setStargate(Stargate gate);
+	default boolean hasStargate() {
+		return this.getStargate() != null;
+	}
 }

@@ -23,6 +23,7 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
     }
 
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+        if (!this.hasStargate()) return ActionResult.FAIL;
         if (world.isClient()) return ActionResult.SUCCESS;
 
         StargateNetwork network = ServerStargateNetwork.getInstance();
