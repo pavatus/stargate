@@ -3,6 +3,7 @@ package dev.pavatus.stargate.core.block;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.core.StargateSounds;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
+import dev.pavatus.stargate.core.item.StargateLinkableItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -45,7 +46,7 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (world.getBlockEntity(pos) instanceof StargateBlockEntity be && hand == Hand.MAIN_HAND) {
+		if (!(player.getStackInHand(hand).getItem() instanceof StargateLinkableItem) && world.getBlockEntity(pos) instanceof StargateBlockEntity be && hand == Hand.MAIN_HAND) {
 			return be.onUse(state, world, pos, player);
 		}
 

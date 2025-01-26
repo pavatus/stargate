@@ -1,9 +1,7 @@
 package dev.pavatus.stargate.core.item;
 
-import dev.pavatus.stargate.api.ClientStargate;
-import dev.pavatus.stargate.api.ClientStargateNetwork;
-import dev.pavatus.stargate.api.Stargate;
-import dev.pavatus.stargate.api.StargateNetwork;
+import dev.pavatus.lib.data.DirectedGlobalPos;
+import dev.pavatus.stargate.api.*;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
@@ -34,7 +32,7 @@ public abstract class StargateLinkableItem extends Item {
 		stack.getOrCreateNbt().putString("Address", address);
 	}
 
-	public boolean isLinked(ItemStack stack) {
+	public static boolean isLinked(ItemStack stack) {
 		return stack.getOrCreateNbt().contains("Address");
 	}
 
@@ -54,7 +52,7 @@ public abstract class StargateLinkableItem extends Item {
 			return;
 
 		if (!Screen.hasShiftDown()) {
-			tooltip.add(Text.translatable("tooltip.sakitus.link_item.holdformoreinfo").formatted(Formatting.GRAY)
+			tooltip.add(Text.translatable("tooltip.stargate.link_item.holdformoreinfo").formatted(Formatting.GRAY)
 					.formatted(Formatting.ITALIC));
 			return;
 		}
@@ -63,8 +61,16 @@ public abstract class StargateLinkableItem extends Item {
 
 		if (stargate != null) {
 			tooltip.add(Text.literal("STARGATE: ").formatted(Formatting.BLUE));
-			tooltip.add(Text.literal("> " + stargate.getAddress().text())
+
+			Address address = stargate.getAddress();
+			DirectedGlobalPos pos = address.pos();
+
+			tooltip.add(Text.literal("> ").append(address.toGlyphs())
 					.formatted(Formatting.DARK_GRAY));
+			tooltip.add(Text.literal("> " + pos.getDimension().getValue().getPath()).formatted(Formatting.DARK_GRAY)); // todo cleanup
+			tooltip.add(Text.literal("> " + pos.getPos().getX() + ", " + pos.getPos().getY() + ", " + pos.getPos().getZ())
+					.formatted(Formatting.DARK_GRAY));
+			tooltip.add(Text.literal("> " + pos.getRotationDirection().name()).formatted(Formatting.DARK_GRAY));
 		}
 	}
 

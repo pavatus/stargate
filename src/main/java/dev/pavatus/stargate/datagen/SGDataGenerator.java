@@ -32,9 +32,14 @@ public class SGDataGenerator implements DataGeneratorEntrypoint {
             SakitusLanguageProvider provider = new SakitusLanguageProvider(output, LanguageType.EN_US);
 
             provider.translateBlocks(StargateBlocks.class);
+            provider.addTranslation(StargateBlocks.DHD, "Dial-Home Device");
+
             provider.translateItems(StargateItems.class);
 
             provider.addTranslation(StargateItems.Groups.MAIN, "STARGATE");
+
+            provider.addTranslation("tooltip.stargate.link_item.holdformoreinfo", "Hold shift for more info");
+            provider.addTranslation("tooltip.stargate.dialer.hint", "Use on stargate to link, then use on another stargate to dial");
 
             return provider;
         })));

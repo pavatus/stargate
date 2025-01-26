@@ -86,10 +86,13 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.translate(0, -0.95f, 0);
         matrices.translate(xOffset, 0, zOffset);
         matrices.scale(0.025f, 0.025f, 0.025f);
+        int middleIndex = Dialer.GLYPHS.length / 2;
         for (int i = 0; i < Dialer.GLYPHS.length; i++) {
-            int j = i + dialer.getSelectedIndex();
+            int j = Dialer.GLYPHS.length - i + dialer.getSelectedIndex() - middleIndex;
 
-            if (j >= Dialer.GLYPHS.length) {
+            if (j < 0) {
+                j += Dialer.GLYPHS.length;
+            } else if (j >= Dialer.GLYPHS.length) {
                 j -= Dialer.GLYPHS.length;
             }
 

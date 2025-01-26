@@ -3,6 +3,7 @@ package dev.pavatus.stargate.core.block;
 import dev.pavatus.lib.api.ICantBreak;
 import dev.pavatus.stargate.core.block.entities.DHDBlockEntity;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
+import dev.pavatus.stargate.core.item.StargateLinkableItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -70,7 +71,7 @@ public class DHDBlock extends HorizontalFacingBlock implements BlockEntityProvid
 
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (world.getBlockEntity(pos) instanceof DHDBlockEntity be && hand == Hand.MAIN_HAND) {
+		if (!(player.getStackInHand(hand).getItem() instanceof StargateLinkableItem) && world.getBlockEntity(pos) instanceof DHDBlockEntity be && hand == Hand.MAIN_HAND) {
 			return be.onUse(state, world, pos, player);
 		}
 
