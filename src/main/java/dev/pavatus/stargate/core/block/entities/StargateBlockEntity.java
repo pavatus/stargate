@@ -122,14 +122,17 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		this.setStargate(Stargate.create(new Address(globalPos)));
 	}
 
+	protected int getRingRadius() {
+		return 4;
+	}
+
 	/**
 	 * Creates a ring of state around the stargate
-	 * todo - FIX DIRECTIONS
 	 * @param state the state to create the ring with
 	 * @return the positions of the blocks created
 	 */
 	public Set<BlockPos> createRing(BlockState state) {
-		int radius = 4; // Adjust the radius as needed
+		int radius = this.getRingRadius(); // Adjust the radius as needed
 		Set<BlockPos> ringPositions = new HashSet<>();
 		BlockPos center = this.getPos().up(radius);
 		Direction facing = this.getCachedState().get(StargateBlock.FACING);
@@ -217,20 +220,21 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		}
 		if (world.getServer() == null) return;
 
-		if (world.getServer().getTicks() % 20 == 0) {
+		if (world.getServer().getTicks() % 5 == 0) {
 			if (this.getStargate() == null) return;
 			if (this.getStargate().getState() != Stargate.GateState.OPEN) return;
 
-			// Define the bounding box
-			// FIXME - this box sucks, should also be thinner
-			Box detectionBox = new Box(
-					pos.getX() - 1 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.X ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? -1 : 1)),
-					pos.getY() + 1,
-					pos.getZ() - 1 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.Z ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? -1 : 1)),
-					pos.getX() + 3 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.X ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? 1 : -1)),
-					pos.getY() + 4,
-					pos.getZ() + 3 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.Z ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? 1 : -1))
-			);
+			// Define the bounding box based on the ring radius and facing direction
+			int radius = this.getRingRadius();
+			Direction facing = world.getBlockState(pos).get(StargateBlock.FACING);
+			Vec3d centre = Vec3d.ofCenter(pos);
+			Box detectionBox = switch (facing) {
+				case EAST -> new Box(centre.add(0.5, 0, -radius), centre.add(-0.5, radius * 2, radius));
+				case WEST -> new Box(centre.add(0.5, 0, radius), centre.add(-0.5, radius * 2, -radius));
+				case NORTH -> new Box(centre.add(-radius, 0, 0.5), centre.add(radius, radius * 2, -0.5));
+				case SOUTH -> new Box(centre.add(radius, 0, 0.5), centre.add(-radius, radius * 2, -0.5));
+				default -> new Box(pos, pos);
+			};
 
 			// Find entities inside the bounding box
 			List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, detectionBox, e -> true);
