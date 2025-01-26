@@ -75,6 +75,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	}
 
 	public void dial(Stargate target, Consumer<Optional<StargateCall>> callback) {
+		this.setState(GateState.DIALING);
 		this.dialer.dial(target.getAddress());
 
 		this.subscribe(new Subscriber() {
@@ -243,6 +244,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		CLOSED,
 		OPEN,
 		PREOPEN,
+		DIALING,
 		BROKEN
 	}
 

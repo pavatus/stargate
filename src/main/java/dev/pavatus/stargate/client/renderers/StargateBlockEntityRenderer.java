@@ -95,7 +95,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
 
             matrices.push();
             double angle = 2 * Math.PI * j / Dialer.GLYPHS.length;
-            matrices.translate(Math.sin(angle) * 90, Math.cos(angle) * 85, 0);
+            matrices.translate(Math.sin(angle) * 90, Math.cos(angle) * 89, 0);
             OrderedText text = Address.toGlyphs(String.valueOf(Dialer.GLYPHS[i])).asOrderedText();
             renderer.drawWithOutline(text, -renderer.getWidth(text) / 2f, 0, 0xFFFFFF, 0x000000,
                     matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
