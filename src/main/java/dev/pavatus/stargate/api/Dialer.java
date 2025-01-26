@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * For tracking a dialing sequence in progress
  */
 public class Dialer {
-	public static final char[] GLYPHS = "ABCDEFGHIJK".toCharArray();
+	public static final char[] GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 	private final Stargate parent;
 	private String target;
 	private char selected;

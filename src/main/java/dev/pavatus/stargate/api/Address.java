@@ -64,7 +64,7 @@ public record Address(String text, DirectedGlobalPos pos) {
 	private static String randomAddress() {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 7; i++) {
-			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(6)));
+			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length)));
 		}
 		return builder.toString();
 	}

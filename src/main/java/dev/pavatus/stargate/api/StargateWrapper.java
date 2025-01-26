@@ -9,6 +9,8 @@ public interface StargateWrapper {
 		getStargate().setState(state);
 	}
 	default Stargate.GateState getGateState() {
+		if (getStargate() == null) return Stargate.GateState.CLOSED;
+
 		return getStargate().getState();
 	}
 
