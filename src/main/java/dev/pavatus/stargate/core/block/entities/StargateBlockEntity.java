@@ -5,6 +5,7 @@ import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
 import dev.pavatus.stargate.core.StargateBlocks;
+import dev.pavatus.stargate.core.StargateSounds;
 import dev.pavatus.stargate.core.block.StargateBlock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -147,6 +148,8 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 
 		if (call == null) {
 			player.sendMessage(Text.literal("TARGET UNAVAILABLE"), true);
+
+			this.getStargate().playSound(StargateSounds.GATE_FAIL, 0.25f, 1f);
 
 			return ActionResult.FAIL;
 		}

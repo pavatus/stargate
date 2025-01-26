@@ -1,10 +1,16 @@
 package dev.pavatus.stargate.api;
 
 import dev.pavatus.lib.data.DirectedGlobalPos;
+import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.lib.util.TeleportUtil;
+import dev.pavatus.stargate.core.StargateSounds;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationPropertyHelper;
@@ -128,7 +134,23 @@ public class Stargate implements StargateCall.Wiretap {
 	public boolean teleportHere(LivingEntity entity) {
 		DirectedGlobalPos pos = this.getAddress().pos();
 		TeleportUtil.teleport(entity, pos.offset(pos.getRotationDirection()));
+
+		this.playSound(StargateSounds.GATE_TELEPORT, 0.25f, 1f);
+
 		return true;
+	}
+
+	/**
+	 * plays a sound at this stargates position
+	 * serverside only
+	 */
+	public void playSound(SoundEvent sound, float volume, float pitch) {
+		MinecraftServer server = ServerLifecycleHooks.get();
+		if (server == null) return;
+		ServerWorld world = server.getWorld(this.address.pos().getDimension());
+		if (world == null) return;
+
+		world.playSound(null, this.address.pos().getPos(), sound, SoundCategory.BLOCKS, volume, pitch);
 	}
 
 	public NbtCompound toNbt() {

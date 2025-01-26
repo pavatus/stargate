@@ -3,6 +3,7 @@ package dev.pavatus.stargate.api;
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
 import dev.pavatus.lib.util.ServerLifecycleHooks;
+import dev.pavatus.stargate.core.StargateSounds;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
@@ -46,6 +47,9 @@ public class StargateCall {
 		for (Wiretap tap : subscribers) {
 			tap.onCallStart(this);
 		}
+
+		this.to.playSound(StargateSounds.GATE_OPEN, 0.25f, 1f);
+		this.from.playSound(StargateSounds.GATE_OPEN, 0.25f, 1f);
 	}
 
 	public void end() {
@@ -54,6 +58,9 @@ public class StargateCall {
 		for (Wiretap tap : subscribers) {
 			tap.onCallEnd(this);
 		}
+
+		this.to.playSound(StargateSounds.GATE_CLOSE, 0.25f, 1f);
+		this.from.playSound(StargateSounds.GATE_CLOSE, 0.25f, 1f);
 	}
 
 	protected void setState(boolean open) {

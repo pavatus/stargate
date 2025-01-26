@@ -1,10 +1,7 @@
 package dev.pavatus.stargate;
 
 import dev.pavatus.lib.container.RegistryContainer;
-import dev.pavatus.stargate.core.StargateBlockEntities;
-import dev.pavatus.stargate.core.StargateBlocks;
-import dev.pavatus.stargate.core.StargateEntities;
-import dev.pavatus.stargate.core.StargateItems;
+import dev.pavatus.stargate.core.*;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
@@ -25,6 +22,7 @@ public class StargateMod implements ModInitializer {
 		RegistryContainer.register(StargateBlocks.class, MOD_ID);
 		RegistryContainer.register(StargateBlockEntities.class, MOD_ID);
 		RegistryContainer.register(StargateEntities.class, MOD_ID);
+		RegistryContainer.register(StargateSounds.class, MOD_ID);
 	}
 
 	public static Identifier id(String path) {
