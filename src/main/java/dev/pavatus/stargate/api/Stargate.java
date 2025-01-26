@@ -24,11 +24,13 @@ public class Stargate implements StargateCall.Wiretap {
 	private final List<Subscriber> subscribers;
 	private StargateCall call;
 	private GateState state;
+	private Dialer dialer;
 
 	protected Stargate(Address address) {
 		this.address = address;
 		this.subscribers = new ArrayList<>();
 		this.state = GateState.CLOSED;
+		this.dialer = new Dialer().onCompleted(this::handleDialerComplete);
 	}
 	protected Stargate(NbtCompound nbt) {
 		this(Address.fromNbt(nbt.getCompound("Address")));
@@ -94,6 +96,10 @@ public class Stargate implements StargateCall.Wiretap {
 	public GateState getState() {
 		return state;
 	}
+	public Dialer getDialer() {
+		return dialer;
+	}
+
 	public void setState(GateState state) {
 		GateState before = this.state;
 		this.state = state;
@@ -153,11 +159,22 @@ public class Stargate implements StargateCall.Wiretap {
 		world.playSound(null, this.address.pos().getPos(), sound, SoundCategory.BLOCKS, volume, pitch);
 	}
 
+	private void handleDialerComplete(Dialer d) {
+		if (this.call != null) {
+			this.call.end();
+		}
+
+		StargateCall call = d.complete(this, ServerLifecycleHooks.get().getOverworld()).orElse(null);
+		if (call == null) return;
+		call.start();
+	}
+
 	public NbtCompound toNbt() {
 		NbtCompound nbt = new NbtCompound();
 
 		nbt.put("Address", address.toNbt());
 		nbt.putInt("State", state.ordinal());
+		nbt.put("Dialer", dialer.toNbt());
 
 		return nbt;
 	}
@@ -168,6 +185,10 @@ public class Stargate implements StargateCall.Wiretap {
 	private void loadNbt(NbtCompound nbt) {
 		if (nbt.contains("State")) {
 			this.state = GateState.values()[nbt.getInt("State")];
+		}
+
+		if (nbt.contains("Dialer")) {
+			this.dialer = new Dialer(nbt.getCompound("Dialer")).onCompleted(this::handleDialerComplete);
 		}
 	}
 
@@ -198,7 +219,7 @@ public class Stargate implements StargateCall.Wiretap {
 		CLOSED,
 		OPEN,
 		PREOPEN,
-			BROKEN
+		BROKEN
 	}
 
 	public interface Subscriber {

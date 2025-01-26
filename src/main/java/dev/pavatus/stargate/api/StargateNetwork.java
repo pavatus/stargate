@@ -72,6 +72,11 @@ public abstract class StargateNetwork {
 				.map(this::get)
 				.findFirst();
 	}
+	public Optional<Address> getAddress(String text) {
+		return lookup.keySet().stream()
+				.filter(address -> address.text().equals(text))
+				.findFirst();
+	}
 
 	/**
 	 * Gets the Stargate associated with the address, or adds it if it doesn't exist.

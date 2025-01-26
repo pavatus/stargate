@@ -5,10 +5,7 @@ import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.*;
 import dev.pavatus.stargate.core.StargateBlockEntities;
 import dev.pavatus.stargate.core.StargateBlocks;
-import dev.pavatus.stargate.core.StargateSounds;
 import dev.pavatus.stargate.core.block.StargateBlock;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -26,8 +23,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -136,32 +131,21 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player) {
 		if (world.isClient()) return ActionResult.SUCCESS;
 
-		// temporary test code
+		// rotate and locking
+		Stargate gate = this.getStargate();
+		Dialer dialer = gate.getDialer();
 
-		// dial a random address that isnt us
-		Stargate chosen = this.getStargate();
-		int counter = 0;
-		while (chosen == this.getStargate() && counter < 10) {
-			chosen = StargateNetwork.getInstance(world).getRandom();
-			counter++;
+		if (player.isSneaking()) {
+			dialer.lock();
+			player.sendMessage(Text.literal("LOCKED " + dialer.getSelected() + " (" + dialer.getAmountLocked() + "/7)"), false);
+
+			player.sendMessage(Text.literal("THIS IS ").append(gate.getAddress().toGlyphs()).append(Text.literal(" (" + gate.getAddress().text() + ")")), true);
+
+			return ActionResult.SUCCESS;
 		}
 
-		StargateCall call = this.getStargate().dial(chosen).orElse(null);
-
-		if (call == null) {
-			player.sendMessage(Text.literal("TARGET UNAVAILABLE"), true);
-
-			this.getStargate().playSound(StargateSounds.GATE_FAIL, 0.25f, 1f);
-
-			return ActionResult.FAIL;
-		}
-
-		call.start();
-		player.sendMessage(Text.literal("CALL CONNECTED TO ").append(chosen.getAddress().toGlyphs()), true);
-
-		call.onEnd(c -> {
-			player.sendMessage(Text.literal("WORMHOLE CLOSED"), true);
-		});
+		dialer.next();
+		player.sendMessage(Text.literal("SELECTED " + dialer.getSelected()), true);
 
 		return ActionResult.SUCCESS;
 	}

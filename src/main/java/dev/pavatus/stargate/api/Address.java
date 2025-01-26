@@ -37,6 +37,10 @@ public record Address(String text, DirectedGlobalPos pos) {
 	 * @return the address in enchanting glyphs
 	 */
 	public Text toGlyphs() {
+		return toGlyphs(text);
+	}
+
+	public Text toGlyphs(String text) {
 		return Text.literal(text).fillStyle(STYLE);
 	}
 
