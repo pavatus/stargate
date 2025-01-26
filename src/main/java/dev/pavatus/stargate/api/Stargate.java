@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +193,10 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 
 	public void sync() {
 		ServerStargateNetwork.getInstance().sync(this);
+	}
+
+	public double distanceFrom(BlockPos pos) {
+		return Math.sqrt(this.address.pos().getPos().getSquaredDistance(pos.getX(), pos.getY(), pos.getZ()));
 	}
 
 	public NbtCompound toNbt() {

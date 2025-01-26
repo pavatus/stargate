@@ -3,6 +3,7 @@ package dev.pavatus.stargate.client;
 import dev.pavatus.stargate.api.ClientStargateNetwork;
 import dev.pavatus.stargate.client.renderers.DHDBlockEntityRenderer;
 import dev.pavatus.stargate.client.renderers.StargateBlockEntityRenderer;
+import dev.pavatus.stargate.client.util.ClientStargateUtil;
 import dev.pavatus.stargate.core.StargateBlockEntities;
 import dev.pavatus.stargate.core.StargateBlocks;
 import net.fabricmc.api.ClientModInitializer;
@@ -16,6 +17,8 @@ public class StargateModClient implements ClientModInitializer {
         ClientStargateNetwork.getInstance();
         registerBlockEntityRenderers();
         setupBlockRendering();
+
+        ClientStargateUtil.init();
     }
 
     public void registerBlockEntityRenderers() {
