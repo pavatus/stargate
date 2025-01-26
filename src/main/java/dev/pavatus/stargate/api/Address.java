@@ -17,6 +17,7 @@ import java.util.Objects;
 
 /**
  * Represents a Stargate address.
+ * 6 Characters Long
  * @param text address in string form
  * @param pos the position of the Stargate
  */
@@ -60,7 +61,7 @@ public record Address(String text, DirectedGlobalPos pos) {
 	private static String randomAddress() {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 7; i++) {
-			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(26)));
+			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(6)));
 		}
 		return builder.toString();
 	}
