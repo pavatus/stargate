@@ -48,7 +48,6 @@ public record Address(String text, DirectedGlobalPos pos) {
 		NbtCompound nbt = new NbtCompound();
 
 		nbt.putString("Text", text);
-
 		nbt.put("Position", pos.toNbt());
 
 		return nbt;

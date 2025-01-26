@@ -80,6 +80,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 			}
 
 			StargateMod.LOGGER.info("Created/Found stargate at {}", this.getPos());
+			this.markDirty();
 		}
 
 		return this.stargate;
@@ -113,14 +114,18 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 		super.writeNbt(nbt);
 
 		nbt.put("Stargate", this.getStargate().toNbt());
-		nbt.putInt("GateState", this.getGateState().ordinal());
 	}
 
 	@Override
 	public void readNbt(NbtCompound nbt) {
 		super.readNbt(nbt);
 
-		if (nbt.contains("Stargate") && this.stargate == null && this.hasWorld()) {
+		if (nbt.contains("Stargate") && this.hasWorld()) {
+			if (this.stargate != null) {
+				this.stargate.dispose();
+				this.stargate = null;
+			}
+
 			this.stargate = Stargate.fromNbt(nbt.getCompound("Stargate"));
 
 			StargateMod.LOGGER.info("Loaded stargate ({}) at {}", this.stargate.getAddress(), this.getPos());
@@ -274,6 +279,7 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 			if (this.getStargate().getState() != Stargate.GateState.OPEN) return;
 
 			// Define the bounding box
+			// FIXME - this box sucks, should also be thinner
 			Box detectionBox = new Box(
 					pos.getX() - 1 + (world.getBlockState(pos).get(StargateBlock.FACING).getAxis() == Direction.Axis.X ? 0 : (world.getBlockState(pos).get(StargateBlock.FACING) == Direction.NORTH ? -1 : 1)),
 					pos.getY() + 1,
@@ -291,10 +297,6 @@ public class StargateBlockEntity extends BlockEntity implements StargateWrapper,
 				StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
 				if (existing != null && existing.to != this.getStargate()) {
 					existing.to.teleportHere(entity);
-
-					if (entity instanceof ServerPlayerEntity player) {
-						player.sendMessage(Text.literal("HAVE A GOOD TRIP"), true);
-					}
 				}
 			}
 		}

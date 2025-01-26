@@ -1,5 +1,6 @@
 package dev.pavatus.stargate.client;
 
+import dev.pavatus.stargate.api.ClientStargateNetwork;
 import dev.pavatus.stargate.client.renderers.DHDBlockEntityRenderer;
 import dev.pavatus.stargate.client.renderers.StargateBlockEntityRenderer;
 import dev.pavatus.stargate.core.StargateBlockEntities;
@@ -12,6 +13,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 public class StargateModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        ClientStargateNetwork.getInstance();
         registerBlockEntityRenderers();
         setupBlockRendering();
     }

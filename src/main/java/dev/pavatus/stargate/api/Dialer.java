@@ -17,6 +17,7 @@ public class Dialer {
 	private List<Consumer<Dialer>> subscribers;
 
 	public Dialer() {
+		this.selected = GLYPHS[0];
 		this.target = "";
 		this.subscribers = new ArrayList<>();
 	}
