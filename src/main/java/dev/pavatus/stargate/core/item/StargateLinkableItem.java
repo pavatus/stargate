@@ -67,7 +67,7 @@ public abstract class StargateLinkableItem extends Item {
 
 			tooltip.add(Text.literal("> ").append(address.toGlyphs())
 					.formatted(Formatting.DARK_GRAY));
-			tooltip.add(Text.literal("> " + pos.getDimension().getValue().getPath()).formatted(Formatting.DARK_GRAY)); // todo cleanup
+			tooltip.add(Text.literal("> ").append(WorldUtil.worldText(pos.getDimension())).formatted(Formatting.DARK_GRAY));
 			tooltip.add(Text.literal("> " + pos.getPos().getX() + ", " + pos.getPos().getY() + ", " + pos.getPos().getZ())
 					.formatted(Formatting.DARK_GRAY));
 			tooltip.add(Text.literal("> " + pos.getRotationDirection().name()).formatted(Formatting.DARK_GRAY));

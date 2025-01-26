@@ -242,8 +242,10 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 			for (LivingEntity entity : entities) {
 				// teleport the player to the stargate
 				StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
+
+				BlockPos offset = BlockPos.ofFloored(entity.getPos().subtract(pos.toCenterPos()));
 				if (existing != null && existing.to != this.getStargate()) {
-					existing.to.teleportHere(entity);
+					existing.to.teleportHere(entity, offset);
 				}
 			}
 		}

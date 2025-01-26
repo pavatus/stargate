@@ -27,7 +27,13 @@ public class ShakeUtil {
 			return;
 
 		float multiplier = (nearest.getDialer().getAmountLocked() / 7f);
+
+		if (nearest.getState() == Stargate.GateState.PREOPEN) {
+			multiplier = 1f;
+		}
+
 		if (multiplier == 0f) return;
+
 
 		shake((1f - ((float) (nearest.distanceFrom(player.getBlockPos()) / MAX_DISTANCE))) * multiplier);
 	}

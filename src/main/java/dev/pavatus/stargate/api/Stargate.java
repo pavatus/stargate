@@ -12,6 +12,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,15 +158,31 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	/**
 	 * Teleports an entity to this stargate
 	 * @param entity entity to teleport
+	 * @param offset offset from the stargate
 	 * @return whether the teleport was successful
 	 */
-	public boolean teleportHere(LivingEntity entity) {
+	public boolean teleportHere(LivingEntity entity, BlockPos offset) {
 		DirectedGlobalPos pos = this.getAddress().pos();
-		TeleportUtil.teleport(entity, pos.offset(pos.getRotationDirection()));
+		pos = pos.offset(offset.getX(), offset.getY(), offset.getZ());
+		pos = pos.offset(pos.getRotationDirection());
+
+		// dont bother for now
+		// pos = WorldUtil.locateSafe(pos, WorldUtil.GroundSearch.CEILING, true);
+
+		TeleportUtil.teleport(entity, pos);
 
 		this.playSound(StargateSounds.GATE_TELEPORT, 0.25f, 1f);
 
 		return true;
+	}
+
+	/**
+	 * Teleports an entity to this stargate
+	 * @param entity entity to teleport
+	 * @return whether the teleport was successful
+	 */
+	public boolean teleportHere(LivingEntity entity) {
+		return this.teleportHere(entity, BlockPos.ORIGIN);
 	}
 
 	/**
