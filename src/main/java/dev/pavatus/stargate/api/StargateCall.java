@@ -23,7 +23,7 @@ public class StargateCall {
 	private final List<Wiretap> subscribers;
 
 	public StargateCall(Stargate from, Stargate to) {
-		this(from, to, 5, TimeUnit.SECONDS);
+		this(from, to, 10, TimeUnit.SECONDS);
 	}
 	/**
 	 * Represents a call between two Stargates.

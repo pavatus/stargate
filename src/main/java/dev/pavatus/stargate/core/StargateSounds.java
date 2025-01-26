@@ -10,6 +10,8 @@ public class StargateSounds implements SoundContainer {
 	public static final SoundEvent GATE_CLOSE = create("gate_close");
 	public static final SoundEvent GATE_FAIL = create("gate_fail");
 	public static final SoundEvent GATE_TELEPORT = create("gate_teleport");
+	public static final SoundEvent WORMHOLE_LOOP = create("wormhole_loop");
+	public static final SoundEvent CHEVRON_LOCK = create("chevron_lock");
 
 	public static SoundEvent create(String name) {
 		return SoundEvent.of(StargateMod.id(name));

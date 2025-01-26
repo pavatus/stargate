@@ -2,6 +2,7 @@ package dev.pavatus.stargate.api;
 
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
+import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.core.StargateSounds;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
@@ -85,6 +86,8 @@ public class Dialer {
 	 */
 	public void lock() {
 		this.append(this.selected);
+
+		this.parent.playSound(StargateSounds.CHEVRON_LOCK, 0.25f, StargateMod.RANDOM.nextFloat(0.9f, 1.1f));
 	}
 	public char getSelected() {
 		return this.selected;
@@ -94,8 +97,11 @@ public class Dialer {
 	 * @return the index of the selected glyph in GLYPHS
 	 */
 	public int getSelectedIndex() {
+		return this.indexOf(this.selected);
+	}
+	public int indexOf(char c) {
 		for (int i = 0; i < GLYPHS.length; i++) {
-			if (GLYPHS[i] == this.selected) {
+			if (GLYPHS[i] == c) {
 				return i;
 			}
 		}
@@ -154,7 +160,7 @@ public class Dialer {
 		if (i == 7) return;
 
 		if (this.selected != address.text().charAt(i)) {
-			this.next();
+			this.rotateTowards(address.text().charAt(i));
 		} else {
 			this.lock();
 			i++;
@@ -164,6 +170,33 @@ public class Dialer {
 
 		int finalI = i;
 		Scheduler.get().runTaskLater(() -> this.internalDial(address, unit, delay, finalI), unit, delay);
+	}
+
+	/**
+	 * @param current the current glyph
+	 * @param target the target glyph
+	 * @return whether it is faster to call next or previous
+	 */
+	private boolean isNextFaster(char current, char target) {
+		int currentIndex = this.indexOf(current);
+		int targetIndex = this.indexOf(target);
+
+		int next = (currentIndex + 1) % GLYPHS.length;
+		int previous = (currentIndex + GLYPHS.length - 1) % GLYPHS.length;
+
+		int nextDistance = Math.abs(next - targetIndex);
+		int previousDistance = Math.abs(previous - targetIndex);
+
+		return nextDistance < previousDistance;
+	}
+	public void rotateTowards(char target) {
+		if (this.selected == target) return;
+
+		if (this.isNextFaster(this.selected, target)) {
+			this.next();
+		} else {
+			this.previous();
+		}
 	}
 
 	/**

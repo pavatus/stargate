@@ -1,5 +1,7 @@
 package dev.pavatus.stargate.core.block;
 
+import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.core.StargateSounds;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -10,12 +12,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -104,5 +109,17 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 			if (ticker instanceof StargateBlockEntity exterior)
 				exterior.tick(world, blockPos, blockState, exterior);
 		};
+	}
+
+	@Override
+	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+		super.randomDisplayTick(state, world, pos, random);
+
+		if (!(world.getBlockEntity(pos) instanceof StargateBlockEntity be)) return;
+		if (be.getGateState() != Stargate.GateState.OPEN) return;
+
+		if (random.nextInt(100) < 5) {
+			be.getStargate().playSound(StargateSounds.WORMHOLE_LOOP, 1.0f, 1.0f);
+		}
 	}
 }
