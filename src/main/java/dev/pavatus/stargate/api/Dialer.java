@@ -236,4 +236,8 @@ public class Dialer {
 	public void dial(Address address) {
 		this.dial(address, TimeUnit.TICKS, 10);
 	}
+
+	public boolean contains(char glyph) {
+		return this.target.contains(String.valueOf(glyph));
+	}
 }

@@ -96,11 +96,23 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
                 j -= Dialer.GLYPHS.length;
             }
 
+            boolean isInDial = dialer.contains(Dialer.GLYPHS[i]);
+            boolean isSelected = i == dialer.getSelectedIndex();
+
+            int colour = 0x4f3909;
+
+            if (isInDial) {
+                colour = 0xc2a159;
+            }
+            if (isSelected) {
+                colour = 0xedb334;
+            }
+
             matrices.push();
             double angle = 2 * Math.PI * j / Dialer.GLYPHS.length;
             matrices.translate(Math.sin(angle) * 90, Math.cos(angle) * 89, 0);
             OrderedText text = Address.toGlyphs(String.valueOf(Dialer.GLYPHS[i])).asOrderedText();
-            renderer.drawWithOutline(text, -renderer.getWidth(text) / 2f, 0, i == dialer.getSelectedIndex() ? 0xedb334 : 0x4f3909, 0x000000,
+            renderer.drawWithOutline(text, -renderer.getWidth(text) / 2f, 0, colour, 0x000000,
                     matrices.peek().getPositionMatrix(), vertexConsumers, 0xF000F0);
             matrices.pop();
         }
