@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.Entity;
@@ -24,7 +23,6 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -36,7 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class StargateBlockEntity extends StargateLinkableBlockEntity implements StargateWrapper, BlockEntityTicker<StargateBlockEntity> {
+public class StargateBlockEntity extends StargateLinkableBlockEntity implements StargateLinkable, BlockEntityTicker<StargateBlockEntity> {
 	public AnimationState ANIM_STATE = new AnimationState();
 	private static final Identifier SYNC_GATE_STATE = new Identifier(StargateMod.MOD_ID, "sync_gate_state");
 	public int age;
@@ -76,10 +74,11 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	}
 
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+		if (!this.hasStargate()) return ActionResult.FAIL;
 		if (world.isClient()) return ActionResult.SUCCESS;
 
 		// rotate and locking
-		Stargate gate = this.getStargate();
+		Stargate gate = this.getStargate().get();
 		Dialer dialer = gate.getDialer();
 
 		if (player.isSneaking()) {
@@ -99,12 +98,6 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 
 	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity e) {
 		if (!(e instanceof LivingEntity entity)) return;
-
-		// teleport the player to the stargate
-		StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
-		if (existing != null && existing.to != this.getStargate()) {
-			existing.to.teleportHere(entity);
-		}
 	}
 
 	public void onBreak() {
@@ -119,7 +112,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 
 		Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
 		DirectedGlobalPos globalPos = DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing));
-		this.setStargate(Stargate.create(new Address(globalPos)));
+		this.setStargate(StargateRef.createAs(this, Stargate.create(new Address(globalPos))));
 	}
 
 	protected int getRingRadius() {
@@ -221,8 +214,8 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		if (world.getServer() == null) return;
 
 		if (world.getServer().getTicks() % 5 == 0) {
-			if (this.getStargate() == null) return;
-			if (this.getStargate().getState() != Stargate.GateState.OPEN) return;
+			if (!this.hasStargate()) return;
+			if (this.getGateState() != Stargate.GateState.OPEN) return;
 
 			// Define the bounding box based on the ring radius and facing direction
 			int radius = this.getRingRadius();
@@ -241,10 +234,10 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 
 			for (LivingEntity entity : entities) {
 				// teleport the player to the stargate
-				StargateCall existing = this.getStargate().getCurrentCall().orElse(null);
+				StargateCall existing = this.getStargate().get().getCurrentCall().orElse(null);
 
 				BlockPos offset = BlockPos.ofFloored(entity.getPos().subtract(pos.toCenterPos()));
-				if (existing != null && existing.to != this.getStargate()) {
+				if (existing != null && existing.to != this.getStargate().get()) {
 					existing.to.teleportHere(entity, offset);
 				}
 			}

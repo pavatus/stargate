@@ -2,6 +2,7 @@ package dev.pavatus.stargate.core.block.entities;
 
 import dev.pavatus.stargate.api.ServerStargateNetwork;
 import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.api.StargateRef;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
@@ -30,7 +31,7 @@ public abstract class NearestLinkingBlockEntity extends StargateLinkableBlockEnt
 		Stargate nearest = ServerStargateNetwork.getInstance().getNearTo(GlobalPos.create(world.getRegistryKey(), pos), 64).orElse(null);
 		if (nearest == null) return;
 
-		this.setStargate(nearest);
+		this.setStargate(StargateRef.createAs(world, nearest));
 
 		if (sendLinkMessage && placer instanceof ServerPlayerEntity player) {
 			player.sendMessage(Text.literal("Linked to " + nearest.getAddress().text()), true);

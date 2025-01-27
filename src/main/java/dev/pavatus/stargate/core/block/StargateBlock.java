@@ -117,10 +117,11 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 		super.randomDisplayTick(state, world, pos, random);
 
 		if (!(world.getBlockEntity(pos) instanceof StargateBlockEntity be)) return;
+		if (!be.hasStargate()) return;
 		if (be.getGateState() != Stargate.GateState.OPEN) return;
 
 		if (random.nextInt(100) < 5) {
-			be.getStargate().playSound(StargateSounds.WORMHOLE_LOOP, 1.0f, 1.0f);
+			be.getStargate().get().playSound(StargateSounds.WORMHOLE_LOOP, 1.0f, 1.0f);
 		}
 	}
 }

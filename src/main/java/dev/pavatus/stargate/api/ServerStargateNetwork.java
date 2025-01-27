@@ -100,16 +100,6 @@ public class ServerStargateNetwork extends StargateNetwork {
 		this.sync(gate, PlayerLookup.all(ServerLifecycleHooks.get()));
 	}
 
-	private void syncToBlockEntity(Stargate gate) {
-		MinecraftServer server = ServerLifecycleHooks.get();
-		if (server == null) return;
-		ServerWorld world = server.getWorld(gate.getAddress().pos().getDimension());
-		if (world == null) return;
-
-		if (!(world.getBlockEntity(gate.getAddress().pos().getPos()) instanceof StargateBlockEntity be)) return;
-		be.setStargate(gate);
-	}
-
 	private static ServerStargateNetwork instance;
 
 	public static ServerStargateNetwork getInstance() {
