@@ -4,6 +4,7 @@ import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.Address;
 import dev.pavatus.stargate.api.Dialer;
 import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.api.StargateRef;
 import dev.pavatus.stargate.client.models.StargateModel;
 import dev.pavatus.stargate.client.portal.PortalRendering;
 import dev.pavatus.stargate.core.block.StargateBlock;
@@ -35,8 +36,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
     @Override
     public void render(StargateBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
-        Stargate possibleGate = entity.getStargate();
-        Stargate.GateState state = possibleGate != null ? entity.getGateState() : Stargate.GateState.CLOSED;
+        Stargate.GateState state = entity.hasStargate() ? entity.getGateState() : Stargate.GateState.CLOSED;
 
         matrices.translate(0.5f, 2.65f, 0.5f);
         float k = entity.getCachedState().get(StargateBlock.FACING).asRotation();
@@ -45,11 +45,12 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.scale(1.75f, 1.75f, 1.75f);
 
 
-        if (possibleGate != null) {
-            Dialer dialer = possibleGate.getDialer();
+        if (entity.hasStargate()) {
+            Stargate gate = entity.getStargate().get();
+            Dialer dialer = gate.getDialer();
             this.setFromDialer(dialer, state);
 
-            this.renderGlyphs(matrices, vertexConsumers, possibleGate);
+            this.renderGlyphs(matrices, vertexConsumers, gate);
         }
 
         this.model.animateStargateModel(entity, state, entity.age);

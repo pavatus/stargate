@@ -1,9 +1,7 @@
 package dev.pavatus.stargate.core.item;
 
 import dev.pavatus.stargate.api.Stargate;
-import dev.pavatus.stargate.api.StargateWrapper;
-import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
-import dev.pavatus.stargate.core.block.entities.StargateLinkableBlockEntity;
+import dev.pavatus.stargate.api.StargateLinkable;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -34,16 +32,18 @@ public class DialerItem extends StargateLinkableItem{
 		BlockPos pos = context.getBlockPos();
 		ItemStack hand = context.getStack();
 
-		if (world.getBlockEntity(pos) instanceof StargateWrapper be) {
+		if (world.getBlockEntity(pos) instanceof StargateLinkable be) {
+			if (!be.hasStargate()) return ActionResult.FAIL;
+
 			if (!isLinked(hand)) {
-				this.link(hand, be.getStargate());
+				this.link(hand, be.getStargate().get());
 				return ActionResult.SUCCESS;
 			}
 
 			Stargate target = StargateLinkableItem.getStargate(world, hand);
 			if (target == null) return ActionResult.FAIL;
 
-			be.getStargate().dial(target);
+			be.getStargate().get().dial(target);
 			hand.decrement(1);
 			return ActionResult.SUCCESS;
 		}
