@@ -186,11 +186,8 @@ public class Dialer {
 		if (this.selected != target) {
 			this.rotateTowards(target);
 		} else {
-			int length = this.target.length();
-
 			this.lock();
-
-			if (length == 6) return;
+			return;
 		}
 
 		Scheduler.get().runTaskLater(() -> this.internalDial(target, unit, delay), unit, delay);
