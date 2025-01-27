@@ -15,8 +15,11 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * A list of all the known addresses and their corresponding Stargates.
@@ -99,6 +102,13 @@ public abstract class StargateNetwork {
 	public Stargate getRandom() {
 		int chosen = (int) (Math.random() * lookup.size());
 		return (Stargate) lookup.values().toArray()[chosen];
+	}
+
+	public void forEach(Consumer<Stargate> action) {
+		lookup.values().forEach(action);
+	}
+	public Stream<Stargate> stream() {
+		return lookup.values().stream();
 	}
 
 	/**
