@@ -98,7 +98,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	}
 
 	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity e) {
-		if (!(e instanceof LivingEntity entity)) return;
+		if (!(e instanceof LivingEntity)) return;
 	}
 
 	public void onBreak() {
@@ -124,7 +124,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	}
 
 	/**
-	 * Creates a ring of state around the stargate
+	 * Creates a ring of state around the stargate using text
 	 * @param state the state to create the ring with
 	 * @return the positions of the blocks created
 	 */
@@ -133,22 +133,6 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		Set<BlockPos> ringPositions = new HashSet<>();
 		BlockPos center = this.getPos().up(radius);
 		Direction facing = this.getCachedState().get(StargateBlock.FACING);
-
-		int x = radius;
-		int y = 0;
-		int radiusError = 1 - x;
-
-		/*while (x >= y) {
-			addCircleBlocks(center, x, y, ringPositions, state, facing);
-			y++;
-
-			if (radiusError < 0) {
-				radiusError += 2 * y + 1;
-			} else {
-				x--;
-				radiusError += 2 * (y - x + 1);
-			}
-		}*/
 
 		String blockPositioning = """
 				___XXX___
@@ -167,7 +151,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		list.forEach((line) -> {
 			for (int i = 0; i < line.length(); i++) {
 				char character = line.charAt(i);
-				int lineStuff = list.indexOf(line);//(list.size() - list.indexOf(line));
+				int lineStuff = list.indexOf(line);
 				if (character == 'X') {
 					System.out.println(character + " X:" + i + "Y:" + -lineStuff);
 					ringPositions.add(center.add(rotate(4 - i, 4 -lineStuff, facing)));
@@ -176,35 +160,10 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		});
 
 		for (BlockPos pos : ringPositions) {
-			//if (!pos.equals(this.getPos())) {
-				//ringPositions.add(pos);
 				world.setBlockState(pos, state);
-			//}
 		}
 
 		return ringPositions;
-	}
-
-	private void addCircleBlocks(BlockPos center, int x, int y, Set<BlockPos> ringPositions, BlockState state, Direction facing) {
-		World world = this.getWorld();
-
-		BlockPos[] positions = new BlockPos[]{
-				center.add(rotate(x, y, facing)),
-				center.add(rotate(-x, y, facing)),
-				center.add(rotate(x, -y, facing)),
-				center.add(rotate(-x, -y, facing)),
-				center.add(rotate(y, x, facing)),
-				center.add(rotate(-y, x, facing)),
-				center.add(rotate(y, -x, facing)),
-				center.add(rotate(-y, -x, facing))
-		};
-
-		for (BlockPos pos : positions) {
-			if (!pos.equals(this.getPos())) {
-				ringPositions.add(pos);
-				world.setBlockState(pos, state);
-			}
-		}
 	}
 
 	public static BlockPos rotate(int x, int y, Direction facing) {
