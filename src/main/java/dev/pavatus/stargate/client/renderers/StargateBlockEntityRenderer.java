@@ -93,10 +93,10 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         float selectedRot = 180 + (float) (27.7f * (0.5 * dialer.getSelectedIndex()));
         float rot = dialer.getSelectedIndex() > -1 ? selectedRot :
                 MathHelper.wrapDegrees(MinecraftClient.getInstance().player.age / 100f * 360f);
+        rot = rot + (14f * dialer.getRotationProgress());
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rot));
         //System.out.println(rot);
         for (int i = 0; i < Dialer.GLYPHS.length; i++) {
-
             boolean isInDial = dialer.contains(Dialer.GLYPHS[i]);
             boolean isSelected = i == dialer.getSelectedIndex();
 
