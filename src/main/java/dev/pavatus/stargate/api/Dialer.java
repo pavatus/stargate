@@ -247,6 +247,14 @@ public class Dialer {
 		this.dial(address, TimeUnit.TICKS, 10);
 	}
 
+	/**
+	 * Dials the target glyph over a period of time
+	 * @param c the target glyph
+	 */
+	public void dial(char c) {
+		this.dial(c, TimeUnit.TICKS, 10);
+	}
+
 	public boolean contains(char glyph) {
 		return this.target.contains(String.valueOf(glyph));
 	}
