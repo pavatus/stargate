@@ -12,6 +12,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -163,6 +164,15 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	 */
 	public boolean teleportHere(LivingEntity entity, BlockPos offset) {
 		DirectedGlobalPos pos = this.getAddress().pos();
+
+		// ignore offsets in this direction
+		Direction dir = pos.getRotationDirection();
+		if (dir == Direction.NORTH || dir == Direction.SOUTH) {
+			offset = offset.east(offset.getX());
+		} else {
+			offset = offset.south(offset.getZ());
+		}
+
 		pos = pos.offset(offset.getX(), offset.getY(), offset.getZ());
 		pos = pos.offset(pos.getRotationDirection());
 
