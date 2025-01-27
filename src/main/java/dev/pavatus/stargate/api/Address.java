@@ -30,7 +30,7 @@ public record Address(String text, DirectedGlobalPos pos) {
 	 * @param pos the position of the Stargate
 	 */
 	public Address(DirectedGlobalPos pos) {
-		this(randomAddress(), pos);
+		this(randomAddress(pos.getDimension().getValue()), pos);
 	}
 
 	/**
@@ -66,6 +66,15 @@ public record Address(String text, DirectedGlobalPos pos) {
 		for (int i = 0; i < 7; i++) {
 			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length)));
 		}
+		return builder.toString();
+	}
+	private static String randomAddress(Identifier world) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 6; i++) {
+			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length)));
+		}
+
+		builder.append(PointOfOriginRegistry.getInstance().get(world).glyph());
 		return builder.toString();
 	}
 
