@@ -19,6 +19,7 @@ public class Dialer {
 	private String target;
 	private char selected;
 	private List<Consumer<Dialer>> subscribers;
+	private boolean firstMove;
 
 	public Dialer(Stargate parent) {
 		this.selected = GLYPHS[0];
@@ -76,6 +77,7 @@ public class Dialer {
 	public String clear() {
 		String old = this.target;
 		this.target = "";
+		this.firstMove = true;
 		this.parent.sync();
 		return old;
 	}
@@ -120,8 +122,7 @@ public class Dialer {
 		int index = this.getSelectedIndex();
 		this.selected = GLYPHS[(index + 1) % GLYPHS.length];
 
-		this.parent.sync();
-		this.parent.playSound(StargateSounds.RING_LOOP, 1.25f, StargateMod.RANDOM.nextFloat(1.0f, 1.25f));
+		this.onMove(true);
 
 		return this.selected;
 	}
@@ -129,10 +130,19 @@ public class Dialer {
 		int index = this.getSelectedIndex();
 		this.selected = GLYPHS[(index + GLYPHS.length - 1) % GLYPHS.length];
 
+		this.onMove(false);
+
+		return this.selected;
+	}
+
+	protected void onMove(boolean next) {
 		this.parent.sync();
 		this.parent.playSound(StargateSounds.RING_LOOP, 1.25f, StargateMod.RANDOM.nextFloat(1.0f, 1.25f));
 
-		return this.selected;
+		if (this.firstMove) {
+			this.parent.playSound(StargateSounds.RING_START, 1.5f, 1.0f);
+			this.firstMove = false;
+		}
 	}
 
 	public int getAmountLocked() {

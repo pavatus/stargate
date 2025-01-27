@@ -13,6 +13,7 @@ public class StargateSounds implements SoundContainer {
 	public static final SoundEvent WORMHOLE_LOOP = create("wormhole_loop");
 	public static final SoundEvent CHEVRON_LOCK = create("chevron_lock");
 	public static final SoundEvent RING_LOOP = create("ring_loop");
+	public static final SoundEvent RING_START = create("ring_start");
 
 	public static SoundEvent create(String name) {
 		return SoundEvent.of(StargateMod.id(name));
