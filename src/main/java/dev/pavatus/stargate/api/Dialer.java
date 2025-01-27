@@ -21,6 +21,7 @@ public class Dialer {
 	private List<Consumer<Dialer>> subscribers;
 	private boolean firstMove;
 	private boolean isAutoDialing;
+	private Rotation lastRotation;
 
 	public Dialer(Stargate parent) {
 		this.selected = GLYPHS[0];
@@ -33,6 +34,12 @@ public class Dialer {
 
 		this.target = nbt.getString("Target");
 		this.selected = nbt.getString("Selected").charAt(0);
+		this.isAutoDialing = nbt.getBoolean("AutoDialing");
+		if (nbt.contains("LastRotation")) {
+			this.lastRotation = Rotation.valueOf(nbt.getString("LastRotation"));
+		} else {
+			this.lastRotation = Rotation.FORWARD;
+		}
 	}
 
 	/**
@@ -79,6 +86,7 @@ public class Dialer {
 		String old = this.target;
 		this.target = "";
 		this.firstMove = true;
+		this.isAutoDialing = false;
 		this.parent.sync();
 		return old;
 	}
@@ -159,6 +167,9 @@ public class Dialer {
 		NbtCompound nbt = new NbtCompound();
 		nbt.putString("Target", this.target);
 		nbt.putString("Selected", String.valueOf(this.selected));
+		nbt.putBoolean("AutoDialing", this.isAutoDialing);
+		if (this.lastRotation == null) this.lastRotation = Rotation.FORWARD;
+		nbt.putString("LastRotation", this.lastRotation.name());
 		return nbt;
 	}
 
@@ -241,13 +252,15 @@ public class Dialer {
 
 		return nextDistance < previousDistance;
 	}
-	public void rotateTowards(char target) {
+	private void rotateTowards(char target) {
 		if (this.selected == target) return;
 
 		if (this.isNextFaster(this.selected, target)) {
 			this.next();
+			this.lastRotation = Rotation.FORWARD;
 		} else {
 			this.previous();
+			this.lastRotation = Rotation.BACKWARD;
 		}
 	}
 
@@ -269,5 +282,23 @@ public class Dialer {
 
 	public boolean contains(char glyph) {
 		return this.target.contains(String.valueOf(glyph));
+	}
+
+	/**
+	 * @return whether its currently moving to a glyph
+	 */
+	public boolean isDialing() {
+		return this.isAutoDialing;
+	}
+
+	/**
+	 * @return the last direction the ring was rotating in
+	 */
+	public Rotation getRotation() {
+		return this.lastRotation;
+	}
+
+	public enum Rotation {
+		FORWARD, BACKWARD
 	}
 }
