@@ -70,9 +70,8 @@ public class OldStargateModel extends BaseStargateModel {
 	@Override
 	public Animation getAnimationForState(Stargate.GateState state) {
 		return switch(state) {
-			case OPEN -> StargateAnimations.PORTAL_ROTATE;
-			case BROKEN -> StargateAnimations.PORTAL_OFF;
-			default -> StargateAnimations.PORTAL_OFF;
+			case DIALING -> StargateAnimations.LOCK_SYMBOL;
+			default -> Animation.Builder.create(0).build();
 		};
 	}
 }

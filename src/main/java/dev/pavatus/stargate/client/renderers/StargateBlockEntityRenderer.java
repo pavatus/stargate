@@ -22,6 +22,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 
 import java.util.List;
@@ -88,16 +89,13 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.translate(xOffset, 0.05f, zOffset);
         matrices.scale(0.025f, 0.025f, 0.025f);
         // TODO fix the rotation stuff here. - Loqor
-        //matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MinecraftClient.getInstance().player.age / 100f * 360f));
         int middleIndex = Dialer.GLYPHS.length / 2;
+        float selectedRot = 180 + (float) (27.7f * (0.5 * dialer.getSelectedIndex()));
+        float rot = dialer.getSelectedIndex() > -1 ? selectedRot :
+                MathHelper.wrapDegrees(MinecraftClient.getInstance().player.age / 100f * 360f);
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rot));
+        //System.out.println(rot);
         for (int i = 0; i < Dialer.GLYPHS.length; i++) {
-            int j = Dialer.GLYPHS.length - i + dialer.getSelectedIndex() - middleIndex;
-
-            if (j < 0) {
-                j += Dialer.GLYPHS.length;
-            } else if (j >= Dialer.GLYPHS.length) {
-                j -= Dialer.GLYPHS.length;
-            }
 
             boolean isInDial = dialer.contains(Dialer.GLYPHS[i]);
             boolean isSelected = i == dialer.getSelectedIndex();
@@ -115,7 +113,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
             double angle = 2 * Math.PI * i / Dialer.GLYPHS.length;
             matrices.translate(Math.sin(angle) * 88, Math.cos(angle) * 88, 0);
             // TODO fix the rotation stuff here. - Loqor
-            //matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(MinecraftClient.getInstance().player.age / -100f * 360f));
+            matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(rot));
             OrderedText text = Address.toGlyphs(String.valueOf(Dialer.GLYPHS[i])).asOrderedText();
             renderer.draw(text, -renderer.getWidth(text) / 2f, -4, colour, false,
                     matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, 0xF000F0);
