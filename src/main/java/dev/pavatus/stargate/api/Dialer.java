@@ -20,6 +20,7 @@ public class Dialer {
 	private char selected;
 	private List<Consumer<Dialer>> subscribers;
 	private boolean firstMove;
+	private boolean isAutoDialing;
 
 	public Dialer(Stargate parent) {
 		this.selected = GLYPHS[0];
@@ -166,11 +167,17 @@ public class Dialer {
 	 * @param address the address to dial
 	 * @param unit units of time
 	 * @param delay the amount of delay between each glyph being appended
+	 * @return whether the dialing was successful
 	 */
-	public void dial(Address address, TimeUnit unit, long delay) {
+	public boolean dial(Address address, TimeUnit unit, long delay) {
+		if (this.isAutoDialing) return false;
+
 		this.clear();
 
 		this.internalDial(address, unit, delay, 0);
+		this.isAutoDialing = true;
+
+		return true;
 	}
 
 	/**
@@ -178,15 +185,22 @@ public class Dialer {
 	 * @param target the target glyph
 	 * @param unit units of time
 	 * @param delay the amount of delay between each glyph being appended
+	 * @return whether the dialing was successful
 	 */
-	public void dial(char target, TimeUnit unit, long delay) {
+	public boolean dial(char target, TimeUnit unit, long delay) {
+		if (this.isAutoDialing) return false;
+
 		this.internalDial(target, unit, delay);
+
+		this.isAutoDialing = true;
+		return true;
 	}
 	private void internalDial(char target, TimeUnit unit, long delay) {
 		if (this.selected != target) {
 			this.rotateTowards(target);
 		} else {
 			this.lock();
+			this.isAutoDialing = false;
 			return;
 		}
 
@@ -194,7 +208,10 @@ public class Dialer {
 	}
 
 	private void internalDial(Address address, TimeUnit unit, long delay, int i) {
-		if (i == 7) return;
+		if (i == 7) {
+			this.isAutoDialing = false;
+			return;
+		}
 
 		if (this.selected != address.text().charAt(i)) {
 			this.rotateTowards(address.text().charAt(i));
@@ -202,8 +219,6 @@ public class Dialer {
 			this.lock();
 			i++;
 		}
-
-		if (this.isComplete()) return;
 
 		int finalI = i;
 		Scheduler.get().runTaskLater(() -> this.internalDial(address, unit, delay, finalI), unit, delay);
@@ -240,16 +255,16 @@ public class Dialer {
 	 * Dials the target address over a period of time
 	 * @param address the address to dial
 	 */
-	public void dial(Address address) {
-		this.dial(address, TimeUnit.TICKS, 10);
+	public boolean dial(Address address) {
+		return this.dial(address, TimeUnit.TICKS, 10);
 	}
 
 	/**
 	 * Dials the target glyph over a period of time
 	 * @param c the target glyph
 	 */
-	public void dial(char c) {
-		this.dial(c, TimeUnit.TICKS, 10);
+	public boolean dial(char c) {
+		return this.dial(c, TimeUnit.TICKS, 10);
 	}
 
 	public boolean contains(char glyph) {
