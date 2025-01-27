@@ -101,7 +101,10 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	}
 
 	public void onBreak() {
-		this.getStargate().dispose();
+		if (this.hasStargate()) {
+			this.getStargate().get().dispose();
+			this.getStargate().dispose();
+		}
 		this.ref = null;
 		this.removeRing();
 	}
