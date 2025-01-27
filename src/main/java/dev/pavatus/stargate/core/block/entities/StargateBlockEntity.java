@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class StargateBlockEntity extends StargateLinkableBlockEntity implements StargateLinkable, BlockEntityTicker<StargateBlockEntity> {
 	public AnimationState ANIM_STATE = new AnimationState();
@@ -137,7 +138,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 		int y = 0;
 		int radiusError = 1 - x;
 
-		while (x >= y) {
+		/*while (x >= y) {
 			addCircleBlocks(center, x, y, ringPositions, state, facing);
 			y++;
 
@@ -147,6 +148,38 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 				x--;
 				radiusError += 2 * (y - x + 1);
 			}
+		}*/
+
+		String blockPositioning = """
+				___XXX___
+				_XX___XX_
+				_X_____X_/
+				X_______X/
+				X_______X//
+				X_______X///
+				X_______X////
+				_X_____X_
+				__XX_XX__.
+				""";
+
+		List<String> list = blockPositioning.lines().toList();
+
+		list.forEach((line) -> {
+			for (int i = 0; i < line.length(); i++) {
+				char character = line.charAt(i);
+				int lineStuff = list.indexOf(line);//(list.size() - list.indexOf(line));
+				if (character == 'X') {
+					System.out.println(character + " X:" + i + "Y:" + -lineStuff);
+					ringPositions.add(center.add(rotate(4 - i, 4 -lineStuff, facing)));
+				}
+			}
+		});
+
+		for (BlockPos pos : ringPositions) {
+			//if (!pos.equals(this.getPos())) {
+				//ringPositions.add(pos);
+				world.setBlockState(pos, state);
+			//}
 		}
 
 		return ringPositions;

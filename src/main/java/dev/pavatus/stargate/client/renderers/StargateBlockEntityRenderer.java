@@ -85,8 +85,10 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         Dialer dialer = gate.getDialer();
         matrices.push();
         matrices.translate(0, -0.95f, 0);
-        matrices.translate(xOffset, 0, zOffset);
+        matrices.translate(xOffset, 0.05f, zOffset);
         matrices.scale(0.025f, 0.025f, 0.025f);
+        // TODO fix the rotation stuff here. - Loqor
+        //matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MinecraftClient.getInstance().player.age / 100f * 360f));
         int middleIndex = Dialer.GLYPHS.length / 2;
         for (int i = 0; i < Dialer.GLYPHS.length; i++) {
             int j = Dialer.GLYPHS.length - i + dialer.getSelectedIndex() - middleIndex;
@@ -110,10 +112,12 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
             }
 
             matrices.push();
-            double angle = 2 * Math.PI * j / Dialer.GLYPHS.length;
-            matrices.translate(Math.sin(angle) * 90, Math.cos(angle) * 89, 0);
+            double angle = 2 * Math.PI * i / Dialer.GLYPHS.length;
+            matrices.translate(Math.sin(angle) * 88, Math.cos(angle) * 88, 0);
+            // TODO fix the rotation stuff here. - Loqor
+            //matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(MinecraftClient.getInstance().player.age / -100f * 360f));
             OrderedText text = Address.toGlyphs(String.valueOf(Dialer.GLYPHS[i])).asOrderedText();
-            renderer.draw(text, -renderer.getWidth(text) / 2f, 0, colour, false,
+            renderer.draw(text, -renderer.getWidth(text) / 2f, -4, colour, false,
                     matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, 0xF000F0);
             matrices.pop();
         }

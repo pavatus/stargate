@@ -277,7 +277,11 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		OPEN,
 		PREOPEN,
 		DIALING,
-		BROKEN
+		BROKEN;
+
+		public boolean isDialing() {
+			return this == DIALING;
+		}
 	}
 
 	public void subscribe(Subscriber subscriber) {

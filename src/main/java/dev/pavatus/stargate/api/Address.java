@@ -3,15 +3,9 @@ package dev.pavatus.stargate.api;
 import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.stargate.StargateMod;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.World;
 
 import java.util.Objects;
 

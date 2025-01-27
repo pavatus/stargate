@@ -19,6 +19,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,9 +65,20 @@ public class DHDBlock extends HorizontalFacingBlock implements BlockEntityProvid
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		if (world.getBlockEntity(pos) instanceof DHDBlockEntity be) {
 			be.onPlaced(world, pos, state, placer, itemStack);
+
+			be.markNeedsControl();
 		}
 
 		super.onPlaced(world, pos, state, placer, itemStack);
+	}
+
+	@Override
+	public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+		super.onBroken(world, pos, state);
+
+		if (world.getBlockEntity(pos) instanceof DHDBlockEntity dhd) {
+			dhd.onBroken();
+		}
 	}
 
 	@Override
