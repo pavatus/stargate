@@ -2,9 +2,7 @@ package dev.pavatus.stargate.compat.ait;
 
 import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.lib.util.ServerLifecycleHooks;
-import dev.pavatus.stargate.api.Address;
-import dev.pavatus.stargate.api.ServerStargateNetwork;
-import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.api.*;
 import loqor.ait.api.TardisEvents;
 import loqor.ait.core.tardis.ServerTardis;
 import loqor.ait.core.tardis.manager.ServerTardisManager;
@@ -15,8 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class AITHandler {
-	private final HashMap<UUID, Stargate> tardisLookup = new HashMap<>();
-
 	static {
 		TardisEvents.DOOR_MOVE.register((tardis, newPos, oldPos) -> {
 			AITHandler handler = AITHandler.getInstance();
@@ -42,6 +38,32 @@ public class AITHandler {
 		Stargate gate = loadExisting(tardis).orElse(Stargate.create(createAddress(tardis)));
 
 		// do stuff
+		gate.subscribe(new Stargate.Subscriber() {
+			@Override
+			public void onCallCreate(Stargate gate, StargateCall call) {
+
+			}
+
+			@Override
+			public void onCallStart(Stargate gate, StargateCall call) {
+				tardis.travel().dematerialize();
+			}
+
+			@Override
+			public void onCallEnd(Stargate gate, StargateCall call) {
+
+			}
+
+			@Override
+			public void onStateChange(Stargate gate, Stargate.GateState before, Stargate.GateState after) {
+				if (after == Stargate.GateState.PREOPEN) {
+					tardis.alarm().enabled().set(true);
+				}
+				if (after == Stargate.GateState.OPEN) {
+					tardis.alarm().enabled().set(false);
+				}
+			}
+		});
 
 		return gate;
 	}
@@ -50,33 +72,28 @@ public class AITHandler {
 
 		return new Address(DirectedGlobalPos.create(tardis.getInteriorWorld().getRegistryKey(), pos.getPos(), pos.getRotation()));
 	}
-	public Stargate getOrCreate(ServerTardis tardis) {
-		return tardisLookup.computeIfAbsent(tardis.getUuid(), uuid -> createStargate(tardis));
+	public StargateRef getOrCreate(ServerTardis tardis) {
+		if (!(tardis instanceof StargateLinkable link)) throw new IllegalStateException("Tardis does not implement StargateLinkable");
+		if (link.hasStargate()) {
+			return link.getStargate();
+		}
+
+		Stargate stargate = createStargate(tardis);
+		link.setStargate(StargateRef.createAs(ServerLifecycleHooks.get().getOverworld(), stargate));
+		return link.getStargate();
 	}
 	public Optional<Stargate> getStargate(ServerTardis tardis) {
-		return Optional.ofNullable(tardisLookup.get(tardis.getUuid()));
-	}
-	public Optional<ServerTardis> getTardis(Stargate stargate) {
-		UUID found = null;
+		if (!(tardis instanceof StargateLinkable link)) return Optional.empty();
+		if (!link.hasStargate()) return Optional.empty();
 
-		for (UUID uuid : tardisLookup.keySet()) {
-			if (tardisLookup.get(uuid).equals(stargate)) {
-				found = uuid;
-				break;
-			}
-		}
-
-		if (found == null) {
-			return Optional.empty();
-		}
-
-		return Optional.ofNullable(ServerTardisManager.getInstance().demandTardis(ServerLifecycleHooks.get(), found));
+		return Optional.of(link.getStargate().get());
 	}
 	private void remove(ServerTardis tardis) {
-		Stargate stargate = tardisLookup.remove(tardis.getUuid());
+		Stargate stargate = getStargate(tardis).orElse(null);
 		if (stargate == null) return;
 
 		stargate.dispose();
+		((StargateLinkable) tardis).setStargate(null);
 	}
 
 	private static AITHandler instance;

@@ -2,7 +2,9 @@
   "required": true,
   "package": "dev.pavatus.stargate.mixins",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "dev.pavatus.stargate.compat.SGMixinPlugin",
   "mixins": [
+    "compat.ait.TardisMixin"
   ],
   "client": [
     "client.framebuffer.MixinMainFramebufferTarget",
