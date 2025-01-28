@@ -50,7 +50,6 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
             Stargate gate = entity.getStargate().get();
             Dialer dialer = gate.getDialer();
             this.setFromDialer(dialer, state);
-
             this.renderGlyphs(matrices, vertexConsumers, gate);
         }
 
@@ -93,9 +92,9 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         float selectedRot = 180 + (float) (27.7f * (0.5 * dialer.getSelectedIndex()));
         float rot = dialer.getSelectedIndex() > -1 ? selectedRot :
                 MathHelper.wrapDegrees(MinecraftClient.getInstance().player.age / 100f * 360f);
-        rot = rot + (14f * dialer.getRotationProgress());
+        if (dialer.isDialing())
+            rot = rot + (dialer.getRotation().equals(Dialer.Rotation.FORWARD) ? 14f : -14f) * dialer.getRotationProgress();
         matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rot));
-        //System.out.println(rot);
         for (int i = 0; i < Dialer.GLYPHS.length; i++) {
             boolean isInDial = dialer.contains(Dialer.GLYPHS[i]);
             boolean isSelected = i == dialer.getSelectedIndex();

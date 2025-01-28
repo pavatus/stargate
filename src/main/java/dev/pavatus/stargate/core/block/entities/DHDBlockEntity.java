@@ -1,6 +1,8 @@
 package dev.pavatus.stargate.core.block.entities;
 
+import dev.pavatus.stargate.api.ServerStargateNetwork;
 import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.api.StargateNetwork;
 import dev.pavatus.stargate.core.StargateBlockEntities;
 import dev.pavatus.stargate.core.dhd.SymbolArrangement;
 import dev.pavatus.stargate.core.entities.DHDControlEntity;
@@ -10,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -35,9 +38,7 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
         if (!this.hasStargate()) return ActionResult.FAIL;
         if (world.isClient()) return ActionResult.SUCCESS;
 
-        return ActionResult.FAIL;
-
-        /*StargateNetwork network = ServerStargateNetwork.getInstance();
+        StargateNetwork network = ServerStargateNetwork.getInstance();
         Stargate target = this.getStargate().get();
 
         int counter = 0;
@@ -52,7 +53,7 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
 
         this.getStargate().get().dial(target);
         player.sendMessage(Text.literal("Dialing ").append(target.getAddress().toGlyphs()), true);
-        return ActionResult.SUCCESS;*/
+        return ActionResult.SUCCESS;
     }
 
     @Override

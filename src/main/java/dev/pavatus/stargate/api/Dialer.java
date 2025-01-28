@@ -196,6 +196,10 @@ public class Dialer {
 		return this.selected;
 	}
 
+	public void setSelected(char glyph) {
+		this.selected = glyph;
+	}
+
 	/**
 	 * @return the index of the selected glyph in GLYPHS
 	 */
