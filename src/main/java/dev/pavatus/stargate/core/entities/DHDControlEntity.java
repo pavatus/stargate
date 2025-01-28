@@ -324,9 +324,9 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
         if (this.dhdBlockPos != null) {
             Vec3d centered = this.getPos().subtract(this.dhdBlockPos.toCenterPos());
             if (this.control != null)
-                player.sendMessage(Text.literal("EntityDimensions.changing(" + this.getControlWidth() + "f, "
-                        + this.getControlHeight() + "f), new Vector3f(" + centered.getX() + "f, " + centered.getY()
-                        + "f, " + centered.getZ() + "f)),"));
+                player.sendMessage(Text.literal(/*"EntityDimensions.changing(" + this.getControlWidth() + "f, "
+                        + this.getControlHeight() + "f), */"new Vector3f(" + centered.getX() + "f, " + centered.getY()
+                        + "f, " + centered.getZ() + "f))," + "    " + this.getCustomName().getString()));
         }
     }
 
