@@ -4,6 +4,7 @@ import dev.pavatus.stargate.api.ServerStargateNetwork;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.api.StargateNetwork;
 import dev.pavatus.stargate.core.StargateBlockEntities;
+import dev.pavatus.stargate.core.block.DHDBlock;
 import dev.pavatus.stargate.core.dhd.SymbolArrangement;
 import dev.pavatus.stargate.core.entities.DHDControlEntity;
 import net.minecraft.block.BlockState;
@@ -15,6 +16,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.joml.Vector3f;
 
@@ -94,8 +96,13 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
         for (SymbolArrangement control : controls) {
             DHDControlEntity controlEntity = DHDControlEntity.create(this.world, this.getStargate().get());
 
-            Vector3f position = current.toCenterPos().toVector3f().add(control.getOffset().x(), control.getOffset().y(),
-                    control.getOffset().z());
+            Vector3f position = current.toCenterPos().toVector3f();
+            Direction direction = this.world.getBlockState(this.getPos()).get(DHDBlock.FACING);
+            position = new Vector3f(
+                    position.x + control.getOffset().x() * direction.getOffsetZ() + (-control.getOffset().z() * direction.getOffsetX()),
+                    position.y + control.getOffset().y(),
+                    position.z + control.getOffset().x() * direction.getOffsetX() - (control.getOffset().z() * direction.getOffsetZ())
+            );
             controlEntity.setPosition(position.x(), position.y(), position.z());
             controlEntity.setYaw(0.0f);
             controlEntity.setPitch(0.0f);

@@ -4,9 +4,11 @@ import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.Address;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.client.models.ControlModel;
+import dev.pavatus.stargate.core.block.DHDBlock;
 import dev.pavatus.stargate.core.entities.DHDControlEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
@@ -30,6 +32,7 @@ public class DHDControlEntityRenderer extends LivingEntityRenderer<DHDControlEnt
     public void render(DHDControlEntity livingEntity, float yaw, float tickDelta, MatrixStack matrixStack,
                        VertexConsumerProvider vertexConsumerProvider, int light) {
         Text name = Address.toGlyphs(livingEntity.getCustomName().getString());
+        double d = this.dispatcher.getSquaredDistanceToCamera(livingEntity);
 
         TextRenderer textRenderer = this.getTextRenderer();
         float h = (float) -textRenderer.getWidth(name) / 2;
@@ -37,11 +40,16 @@ public class DHDControlEntityRenderer extends LivingEntityRenderer<DHDControlEnt
 
         Stargate stargate = livingEntity.getStargate().get();
 
-        if (stargate == null)
+        if (stargate == null) {
+            matrixStack.pop();
             return;
+        }
 
         matrixStack.push();
         matrixStack.translate(0.0f, f, 0.0f);
+
+        //float k = livingEntity.getWorld().getBlockState(livingEntity.dhdBlockPos).get(DHDBlock.FACING).asRotation();
+        matrixStack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(MinecraftClient.getInstance().player.getHeadYaw()));
         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(65));
         matrixStack.scale(-0.0075f, -0.0075f, 0.0075f);
 

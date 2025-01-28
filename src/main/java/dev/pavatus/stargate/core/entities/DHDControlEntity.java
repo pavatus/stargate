@@ -48,7 +48,7 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
     private static final TrackedData<Vector3f> OFFSET = DataTracker.registerData(DHDControlEntity.class,
             TrackedDataHandlerRegistry.VECTOR3F);
 
-    private BlockPos dhdBlockPos;
+    public BlockPos dhdBlockPos;
     private SymbolControl control;
 
     public DHDControlEntity(EntityType<? extends LivingEntity> entityType, World world) {
