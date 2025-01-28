@@ -25,6 +25,9 @@
 		],
 		"client": [
 			"dev.pavatus.stargate.client.StargateModClient"
+		],
+		"sakitus-main": [
+			"dev.pavatus.stargate.sakitus.SakitusHandler"
 		]
 	},
 	"mixins": [

@@ -3,15 +3,9 @@ package dev.pavatus.stargate.api;
 import dev.pavatus.lib.data.DirectedGlobalPos;
 import dev.pavatus.stargate.StargateMod;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.World;
 
 import java.util.Objects;
 
@@ -30,7 +24,7 @@ public record Address(String text, DirectedGlobalPos pos) {
 	 * @param pos the position of the Stargate
 	 */
 	public Address(DirectedGlobalPos pos) {
-		this(randomAddress(), pos);
+		this(randomAddress(pos.getDimension().getValue()), pos);
 	}
 
 	/**
@@ -66,6 +60,15 @@ public record Address(String text, DirectedGlobalPos pos) {
 		for (int i = 0; i < 7; i++) {
 			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length)));
 		}
+		return builder.toString();
+	}
+	private static String randomAddress(Identifier world) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 6; i++) {
+			builder.append((char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length)));
+		}
+
+		builder.append(PointOfOriginRegistry.getInstance().get(world).glyph());
 		return builder.toString();
 	}
 

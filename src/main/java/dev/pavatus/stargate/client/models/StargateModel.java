@@ -1,6 +1,7 @@
 package dev.pavatus.stargate.client.models;
 
 import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.client.animations.StargateAnimations;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.animation.Animation;
@@ -105,39 +106,39 @@ public class StargateModel extends BaseStargateModel {
 
 		ModelPartData cube_r24 = chevrons.addChild("cube_r24", ModelPartBuilder.create().uv(146, 75).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.25F)), ModelTransform.of(-13.1557F, -36.145F, 0.0F, 0.0F, 0.0F, 2.7925F));
 
-		ModelPartData lights = chevrons.addChild("lights", ModelPartBuilder.create(), ModelTransform.pivot(-33.3114F, -19.2323F, 0.0F));
+		ModelPartData lights = chevrons.addChild("lights", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
 
 		ModelPartData chevron_one = lights.addChild("chevron_one", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
 
-		ModelPartData cube_r25 = chevron_one.addChild("cube_r25", ModelPartBuilder.create().uv(0, 173).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(20.1557F, -16.9126F, 0.0F, 0.0F, 0.0F, 2.7925F));
+		ModelPartData cube_r25 = chevron_one.addChild("cube_r25", ModelPartBuilder.create().uv(0, 173).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(-13.1557F, -36.145F, 0.0F, 0.0F, 0.0F, 2.7925F));
 
-		ModelPartData chevron_two = lights.addChild("chevron_two", ModelPartBuilder.create(), ModelTransform.pivot(46.4671F, -16.9126F, 0.0F));
+		ModelPartData chevron_two = lights.addChild("chevron_two", ModelPartBuilder.create(), ModelTransform.pivot(13.1557F, -36.145F, 0.0F));
 
 		ModelPartData cube_r26 = chevron_two.addChild("cube_r26", ModelPartBuilder.create().uv(146, 165).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -2.7925F));
 
-		ModelPartData chevron_three = lights.addChild("chevron_three", ModelPartBuilder.create(), ModelTransform.pivot(66.6228F, 0.0F, 0.0F));
+		ModelPartData chevron_three = lights.addChild("chevron_three", ModelPartBuilder.create(), ModelTransform.pivot(33.3114F, -19.2323F, 0.0F));
 
 		ModelPartData cube_r27 = chevron_three.addChild("cube_r27", ModelPartBuilder.create().uv(73, 158).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -2.0944F));
 
-		ModelPartData chevron_four = lights.addChild("chevron_four", ModelPartBuilder.create(), ModelTransform.pivot(71.1917F, 25.9117F, 0.0F));
+		ModelPartData chevron_four = lights.addChild("chevron_four", ModelPartBuilder.create(), ModelTransform.pivot(37.8803F, 6.6793F, 0.0F));
 
 		ModelPartData cube_r28 = chevron_four.addChild("cube_r28", ModelPartBuilder.create().uv(0, 158).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -1.3963F));
 
-		ModelPartData chevron_five = lights.addChild("chevron_five", ModelPartBuilder.create(), ModelTransform.pivot(58.036F, 48.698F, 0.0F));
+		ModelPartData chevron_five = lights.addChild("chevron_five", ModelPartBuilder.create(), ModelTransform.pivot(24.7246F, 29.4657F, 0.0F));
 
 		ModelPartData cube_r29 = chevron_five.addChild("cube_r29", ModelPartBuilder.create().uv(146, 150).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -0.6981F));
 
-		ModelPartData chevron_six = lights.addChild("chevron_six", ModelPartBuilder.create().uv(146, 135).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.pivot(33.3114F, 57.697F, 0.0F));
+		ModelPartData chevron_six = lights.addChild("chevron_six", ModelPartBuilder.create().uv(146, 135).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.pivot(0.0F, 38.4647F, 0.0F));
 
-		ModelPartData chevron_seven = lights.addChild("chevron_seven", ModelPartBuilder.create(), ModelTransform.pivot(8.5868F, 48.698F, 0.0F));
+		ModelPartData chevron_seven = lights.addChild("chevron_seven", ModelPartBuilder.create(), ModelTransform.pivot(-24.7246F, 29.4657F, 0.0F));
 
 		ModelPartData cube_r30 = chevron_seven.addChild("cube_r30", ModelPartBuilder.create().uv(146, 120).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.6981F));
 
-		ModelPartData chevron_eight = lights.addChild("chevron_eight", ModelPartBuilder.create(), ModelTransform.pivot(-4.5689F, 25.9117F, 0.0F));
+		ModelPartData chevron_eight = lights.addChild("chevron_eight", ModelPartBuilder.create(), ModelTransform.pivot(-37.8803F, 6.6793F, 0.0F));
 
 		ModelPartData cube_r31 = chevron_eight.addChild("cube_r31", ModelPartBuilder.create().uv(146, 105).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.3963F));
 
-		ModelPartData chevron_nine = lights.addChild("chevron_nine", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		ModelPartData chevron_nine = lights.addChild("chevron_nine", ModelPartBuilder.create(), ModelTransform.pivot(-33.3114F, -19.2323F, 0.0F));
 
 		ModelPartData cube_r32 = chevron_nine.addChild("cube_r32", ModelPartBuilder.create().uv(146, 90).cuboid(-14.0F, -3.75F, -4.0F, 28.0F, 6.0F, 8.0F, new Dilation(0.255F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 2.0944F));
 
@@ -179,6 +180,9 @@ public class StargateModel extends BaseStargateModel {
 
 	@Override
 	public Animation getAnimationForState(Stargate.GateState state) {
-		return Animation.Builder.create(0).build();
+		return switch(state) {
+			case DIALING, PREOPEN, OPEN -> StargateAnimations.LOCK_SYMBOL;
+			default -> Animation.Builder.create(0).build();
+		};
 	}
 }

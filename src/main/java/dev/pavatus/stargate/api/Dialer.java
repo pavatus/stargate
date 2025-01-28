@@ -5,6 +5,7 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.core.StargateSounds;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -20,6 +21,10 @@ public class Dialer {
 	private char selected;
 	private List<Consumer<Dialer>> subscribers;
 	private boolean firstMove;
+	private boolean isAutoDialing;
+	private Rotation lastRotation;
+	private int rotationTicks;
+	private int maxRotationTicks;
 
 	public Dialer(Stargate parent) {
 		this.selected = GLYPHS[0];
@@ -29,9 +34,105 @@ public class Dialer {
 	}
 	public Dialer(Stargate parent, NbtCompound nbt) {
 		this(parent);
-
 		this.target = nbt.getString("Target");
 		this.selected = nbt.getString("Selected").charAt(0);
+		this.isAutoDialing = nbt.getBoolean("AutoDialing");
+		this.rotationTicks = nbt.getInt("RotationTicks");
+		this.maxRotationTicks = nbt.getInt("MaxRotationTicks");
+		if (nbt.contains("LastRotation")) {
+			this.lastRotation = Rotation.valueOf(nbt.getString("LastRotation"));
+		} else {
+			this.lastRotation = Rotation.FORWARD;
+		}
+	}
+
+	public NbtCompound toNbt() {
+		NbtCompound nbt = new NbtCompound();
+		nbt.putString("Target", this.target);
+		nbt.putString("Selected", String.valueOf(this.selected));
+		nbt.putBoolean("AutoDialing", this.isAutoDialing);
+		nbt.putInt("RotationTicks", this.getRotationTicks());
+		nbt.putInt("MaxRotationTicks", this.getMaxRotationTicks());
+		if (this.lastRotation == null) this.lastRotation = Rotation.FORWARD;
+		nbt.putString("LastRotation", this.lastRotation.name());
+		return nbt;
+	}
+
+	public void setRotationTicks(int rotationTicks) {
+		this.rotationTicks = rotationTicks;
+		this.parent.sync();
+	}
+
+	public void setMaxRotationTicks(int maxRotationTicks) {
+		this.maxRotationTicks = maxRotationTicks;
+		this.parent.sync();
+	}
+
+	private int getRotationTicks() {
+		return rotationTicks;
+	}
+
+	private int getMaxRotationTicks() {
+		return maxRotationTicks;
+	}
+	public float getRotationProgress() {
+		return MathHelper.clamp((float) this.getRotationTicks() / ((float) this.getMaxRotationTicks()), 0, 1);
+	}
+
+	public boolean dial(String address, TimeUnit unit, long delay) {
+		if (this.isAutoDialing) return false;
+		delay = delay / 2;
+
+		if (address.length() > 1){
+			this.clear();
+		}
+
+		this.setMaxRotationTicks((int) TimeUnit.TICKS.from(unit, delay));
+		this.internalDial(address, 0);
+		this.isAutoDialing = true;
+		return true;
+	}
+
+	public boolean dial(Address address, TimeUnit unit, long delay) {
+		return this.dial(address.text(), unit, delay);
+	}
+
+	public boolean dial(char target, TimeUnit unit, long delay) {
+		return this.dial(String.valueOf(target), unit, delay);
+	}
+
+	private void internalDial(String address, int i) {
+		if (i == address.length()) {
+			this.isAutoDialing = false;
+			return;
+		}
+
+		if (this.selected == address.charAt(i)) {
+			this.rotationTicks = this.getMaxRotationTicks();
+		}
+
+		if (i == 0 && this.rotateTowards(address.charAt(i), true)) {
+			this.lastRotation = this.lastRotation == Rotation.FORWARD ? Rotation.BACKWARD : Rotation.FORWARD;
+		}
+		if (this.getRotationTicks() < this.getMaxRotationTicks()) {
+			this.setRotationTicks(this.getRotationTicks() + 1);
+		} else {
+			this.setRotationTicks(0);
+			if (this.selected != address.charAt(i)) {
+				this.rotateTowards(address.charAt(i), false);
+			} else {
+				this.lock();
+				i++;
+				this.setRotationTicks(-this.getMaxRotationTicks());
+
+				if (i != address.length() && this.rotateTowards(address.charAt(i), true)) {
+					this.lastRotation = this.lastRotation == Rotation.FORWARD ? Rotation.BACKWARD : Rotation.FORWARD;
+				}
+			}
+		}
+
+		int finalI = i;
+		Scheduler.get().runTaskLater(() -> this.internalDial(address, finalI), TimeUnit.TICKS, 1);
 	}
 
 	/**
@@ -78,6 +179,7 @@ public class Dialer {
 		String old = this.target;
 		this.target = "";
 		this.firstMove = true;
+		this.isAutoDialing = false;
 		this.parent.sync();
 		return old;
 	}
@@ -93,6 +195,10 @@ public class Dialer {
 	}
 	public char getSelected() {
 		return this.selected;
+	}
+
+	public void setSelected(char glyph) {
+		this.selected = glyph;
 	}
 
 	/**
@@ -154,64 +260,6 @@ public class Dialer {
 		return this;
 	}
 
-	public NbtCompound toNbt() {
-		NbtCompound nbt = new NbtCompound();
-		nbt.putString("Target", this.target);
-		nbt.putString("Selected", String.valueOf(this.selected));
-		return nbt;
-	}
-
-	/**
-	 * Dials the target address over a period of time
-	 * @param address the address to dial
-	 * @param unit units of time
-	 * @param delay the amount of delay between each glyph being appended
-	 */
-	public void dial(Address address, TimeUnit unit, long delay) {
-		this.clear();
-
-		this.internalDial(address, unit, delay, 0);
-	}
-
-	/**
-	 * Dials the target glyph over a period of time
-	 * @param target the target glyph
-	 * @param unit units of time
-	 * @param delay the amount of delay between each glyph being appended
-	 */
-	public void dial(char target, TimeUnit unit, long delay) {
-		this.internalDial(target, unit, delay);
-	}
-	private void internalDial(char target, TimeUnit unit, long delay) {
-		if (this.selected != target) {
-			this.rotateTowards(target);
-		} else {
-			int length = this.target.length();
-
-			this.lock();
-
-			if (length == 6) return;
-		}
-
-		Scheduler.get().runTaskLater(() -> this.internalDial(target, unit, delay), unit, delay);
-	}
-
-	private void internalDial(Address address, TimeUnit unit, long delay, int i) {
-		if (i == 7) return;
-
-		if (this.selected != address.text().charAt(i)) {
-			this.rotateTowards(address.text().charAt(i));
-		} else {
-			this.lock();
-			i++;
-		}
-
-		if (this.isComplete()) return;
-
-		int finalI = i;
-		Scheduler.get().runTaskLater(() -> this.internalDial(address, unit, delay, finalI), unit, delay);
-	}
-
 	/**
 	 * @param current the current glyph
 	 * @param target the target glyph
@@ -229,33 +277,76 @@ public class Dialer {
 
 		return nextDistance < previousDistance;
 	}
-	public void rotateTowards(char target) {
-		if (this.selected == target) return;
+
+	private boolean simulateRotateTowards(char target) {
+		if (this.selected == target) return false;
+
+		Rotation before = this.lastRotation;
+		Rotation after = before;
+
+		if (this.isNextFaster(this.selected, target)) {
+			after = Rotation.FORWARD;
+		} else {
+			after = Rotation.BACKWARD;
+		}
+
+		return before != after;
+	}
+	private boolean rotateTowards(char target, boolean simulate) {
+		if (this.selected == target) return false;
+
+		if (simulate) {
+			return this.simulateRotateTowards(target);
+		}
+
+		Rotation before = this.lastRotation;
 
 		if (this.isNextFaster(this.selected, target)) {
 			this.next();
+			this.lastRotation = Rotation.FORWARD;
 		} else {
 			this.previous();
+			this.lastRotation = Rotation.BACKWARD;
 		}
+
+		return before != this.lastRotation;
 	}
 
 	/**
 	 * Dials the target address over a period of time
 	 * @param address the address to dial
 	 */
-	public void dial(Address address) {
-		this.dial(address, TimeUnit.TICKS, 10);
+	public boolean dial(Address address) {
+		return this.dial(address, TimeUnit.TICKS, 10);
 	}
 
 	/**
 	 * Dials the target glyph over a period of time
 	 * @param c the target glyph
 	 */
-	public void dial(char c) {
-		this.dial(c, TimeUnit.TICKS, 10);
+	public boolean dial(char c) {
+		return this.dial(c, TimeUnit.TICKS, 10);
 	}
 
 	public boolean contains(char glyph) {
 		return this.target.contains(String.valueOf(glyph));
+	}
+
+	/**
+	 * @return whether its currently moving to a glyph
+	 */
+	public boolean isDialing() {
+		return this.isAutoDialing;
+	}
+
+	/**
+	 * @return the last direction the ring was rotating in
+	 */
+	public Rotation getRotation() {
+		return this.lastRotation;
+	}
+
+	public enum Rotation {
+		FORWARD, BACKWARD
 	}
 }

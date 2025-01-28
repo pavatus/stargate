@@ -5,8 +5,10 @@ import dev.pavatus.stargate.api.ServerStargateNetwork;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.api.StargateServerData;
 import dev.pavatus.stargate.core.*;
+import dev.pavatus.stargate.core.entities.DHDControlEntity;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,13 @@ public class StargateMod implements ModInitializer {
 		RegistryContainer.register(StargateSounds.class, MOD_ID);
 
 		StargateServerData.init();
+
+		entityAttributeRegister();
+	}
+
+	public void entityAttributeRegister() {
+		FabricDefaultAttributeRegistry.register(StargateEntities.DHD_CONTROL_TYPE,
+				DHDControlEntity.createDummyAttributes());
 	}
 
 	public static Identifier id(String path) {

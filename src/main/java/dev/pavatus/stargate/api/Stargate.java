@@ -269,6 +269,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	public static Stargate create(Address address) {
 		Stargate created = new Stargate(address);
 		StargateNetwork.getInstance(true).add(created);
+		created.getDialer().setSelected('Q');
 		return created;
 	}
 
@@ -277,7 +278,11 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		OPEN,
 		PREOPEN,
 		DIALING,
-		BROKEN
+		BROKEN;
+
+		public boolean isDialing() {
+			return this == DIALING;
+		}
 	}
 
 	public void subscribe(Subscriber subscriber) {

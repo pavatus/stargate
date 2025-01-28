@@ -4,7 +4,9 @@ import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.pavatus.stargate.api.Stargate;
+import dev.pavatus.stargate.client.models.StargateModel;
 import dev.pavatus.stargate.client.renderers.StargateBlockEntityRenderer;
+import dev.pavatus.stargate.core.StargateEntities;
 import dev.pavatus.stargate.core.block.entities.StargateBlockEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -51,7 +53,7 @@ public class PortalRendering {
         stack.translate(0, -0.9, 0.05);
         stack.scale(1, 1, 1);
         if (state != Stargate.GateState.OPEN)
-            mask.render(stack, portalProvider.getBuffer(RenderLayer.getEndGateway()), 0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
+            mask.render(stack, portalProvider.getBuffer(RenderLayer.getEndPortal()), 0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
         else {
             mask.render(stack, portalProvider.getBuffer(RenderLayer.getEntityTranslucentCull(frameTex)), 0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
         }
@@ -67,7 +69,8 @@ public class PortalRendering {
 
         stack.push();
         //stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) MinecraftClient.getInstance().player.age / 100 * 360f));
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
+        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees((float) MinecraftClient.getInstance().player.age / 50 * 360f));
         stack.translate(0, 0, 100);
         PortalUtil util = new PortalUtil("watery");
         if (state == Stargate.GateState.OPEN) {
@@ -75,6 +78,14 @@ public class PortalRendering {
         }
         portalProvider.draw();
         stack.pop();
+
+        /*stack.push();
+        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        stack.translate(0, 0, 5);
+        StargateModel model = new StargateModel(StargateModel.getTexturedModelData().createModel());
+        model.render(stack, portalProvider.getBuffer(RenderLayer.getWaterMask()), 0xf000f0, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
+        portalProvider.draw();
+        stack.pop();*/
 
         MinecraftClient.getInstance().getFramebuffer().beginWrite(true);
 
