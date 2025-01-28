@@ -153,7 +153,6 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 				char character = line.charAt(i);
 				int lineStuff = list.indexOf(line);
 				if (character == 'X') {
-					System.out.println(character + " X:" + i + "Y:" + -lineStuff);
 					ringPositions.add(center.add(rotate(4 - i, 4 -lineStuff, facing)));
 				}
 			}

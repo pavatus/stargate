@@ -5,6 +5,7 @@ import dev.drtheo.scheduler.api.TimeUnit;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.core.StargateSounds;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -75,63 +76,63 @@ public class Dialer {
 		return maxRotationTicks;
 	}
 	public float getRotationProgress() {
-		return (float) this.getRotationTicks() / ((float) this.getMaxRotationTicks());
+		return MathHelper.clamp((float) this.getRotationTicks() / ((float) this.getMaxRotationTicks()), 0, 1);
 	}
 
-	public boolean dial(Address address, TimeUnit unit, long delay) {
+	public boolean dial(String address, TimeUnit unit, long delay) {
 		if (this.isAutoDialing) return false;
-		this.clear();
+		delay = delay / 2;
+
+		if (address.length() > 1){
+			this.clear();
+		}
+
 		this.setMaxRotationTicks((int) TimeUnit.TICKS.from(unit, delay));
 		this.internalDial(address, 0);
 		this.isAutoDialing = true;
 		return true;
 	}
 
-	public boolean dial(char target, TimeUnit unit, long delay) {
-		if (this.isAutoDialing) return false;
-		this.setMaxRotationTicks((int) TimeUnit.TICKS.from(unit, delay));
-		this.internalDial(target);
-		this.isAutoDialing = true;
-		return true;
+	public boolean dial(Address address, TimeUnit unit, long delay) {
+		return this.dial(address.text(), unit, delay);
 	}
 
-	private void internalDial(Address address, int i) {
-		if (i == 7) {
+	public boolean dial(char target, TimeUnit unit, long delay) {
+		return this.dial(String.valueOf(target), unit, delay);
+	}
+
+	private void internalDial(String address, int i) {
+		if (i == address.length()) {
 			this.isAutoDialing = false;
 			return;
 		}
 
+		if (this.selected == address.charAt(i)) {
+			this.rotationTicks = this.getMaxRotationTicks();
+		}
+
+		if (i == 0 && this.rotateTowards(address.charAt(i), true)) {
+			this.lastRotation = this.lastRotation == Rotation.FORWARD ? Rotation.BACKWARD : Rotation.FORWARD;
+		}
 		if (this.getRotationTicks() < this.getMaxRotationTicks()) {
 			this.setRotationTicks(this.getRotationTicks() + 1);
 		} else {
 			this.setRotationTicks(0);
-			if (this.selected != address.text().charAt(i)) {
-				this.rotateTowards(address.text().charAt(i));
+			if (this.selected != address.charAt(i)) {
+				this.rotateTowards(address.charAt(i), false);
 			} else {
 				this.lock();
 				i++;
+				this.setRotationTicks(-this.getMaxRotationTicks());
+
+				if (i != address.length() && this.rotateTowards(address.charAt(i), true)) {
+					this.lastRotation = this.lastRotation == Rotation.FORWARD ? Rotation.BACKWARD : Rotation.FORWARD;
+				}
 			}
 		}
 
 		int finalI = i;
 		Scheduler.get().runTaskLater(() -> this.internalDial(address, finalI), TimeUnit.TICKS, 1);
-	}
-
-	private void internalDial(char target) {
-		if (this.getRotationTicks() < this.getMaxRotationTicks()) {
-			this.setRotationTicks(this.getRotationTicks() + 1);
-		} else {
-			this.setRotationTicks(0);
-			if (this.selected != target) {
-				this.rotateTowards(target);
-			} else {
-				this.lock();
-				this.isAutoDialing = false;
-				return;
-			}
-		}
-
-		Scheduler.get().runTaskLater(() -> this.internalDial(target), TimeUnit.TICKS, 1);
 	}
 
 	/**
@@ -276,8 +277,29 @@ public class Dialer {
 
 		return nextDistance < previousDistance;
 	}
-	private void rotateTowards(char target) {
-		if (this.selected == target) return;
+
+	private boolean simulateRotateTowards(char target) {
+		if (this.selected == target) return false;
+
+		Rotation before = this.lastRotation;
+		Rotation after = before;
+
+		if (this.isNextFaster(this.selected, target)) {
+			after = Rotation.FORWARD;
+		} else {
+			after = Rotation.BACKWARD;
+		}
+
+		return before != after;
+	}
+	private boolean rotateTowards(char target, boolean simulate) {
+		if (this.selected == target) return false;
+
+		if (simulate) {
+			return this.simulateRotateTowards(target);
+		}
+
+		Rotation before = this.lastRotation;
 
 		if (this.isNextFaster(this.selected, target)) {
 			this.next();
@@ -286,6 +308,8 @@ public class Dialer {
 			this.previous();
 			this.lastRotation = Rotation.BACKWARD;
 		}
+
+		return before != this.lastRotation;
 	}
 
 	/**

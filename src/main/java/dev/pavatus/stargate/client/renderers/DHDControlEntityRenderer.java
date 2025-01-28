@@ -31,6 +31,8 @@ public class DHDControlEntityRenderer extends LivingEntityRenderer<DHDControlEnt
     @Override
     public void render(DHDControlEntity livingEntity, float yaw, float tickDelta, MatrixStack matrixStack,
                        VertexConsumerProvider vertexConsumerProvider, int light) {
+        if (livingEntity.getCustomName() == null) return;
+
         Text name = Address.toGlyphs(livingEntity.getCustomName().getString());
         double d = this.dispatcher.getSquaredDistanceToCamera(livingEntity);
 
