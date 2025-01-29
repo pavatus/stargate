@@ -45,19 +45,22 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
         matrices.scale(1.75f, 1.75f, 1.75f);
 
+        float power = 1;
 
         if (entity.hasStargate()) {
             Stargate gate = entity.getStargate().get();
             Dialer dialer = gate.getDialer();
             this.setFromDialer(dialer, state);
             this.renderGlyphs(matrices, vertexConsumers, gate);
+
+            power = gate.hasEnoughPower() ? 1 : (float) gate.energy.amount / gate.getRequiredPower();
         }
 
         this.model.animateStargateModel(entity, state, entity.age);
         int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up().up().up().up());
         this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutout(TEXTURE)), lightAbove, overlay, 1, 1, 1, 1);
         PortalRendering.renderPortal(entity, state, matrices, EMISSION, this.model.portal);
-        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, 1, 1, 1);
+        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, power, power, 1);
         this.model.portal.visible = state == Stargate.GateState.OPEN;
 
         matrices.pop();

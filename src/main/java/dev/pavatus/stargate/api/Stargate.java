@@ -14,6 +14,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,13 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	private StargateCall call;
 	private GateState state;
 	private Dialer dialer;
+
+	public final SimpleEnergyStorage energy = new SimpleEnergyStorage(100000, 32, 0) {
+		@Override
+		protected void onFinalCommit() {
+			Stargate.this.sync();
+		}
+	};
 
 	protected Stargate(Address address) {
 		this.address = address;
@@ -47,6 +55,17 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 	}
 
 	/**
+	 * @return whether this stargate has enough power for a call
+	 */
+	public boolean hasEnoughPower() {
+		return this.energy.amount >= this.getRequiredPower();
+	}
+
+	public int getRequiredPower() {
+		return 50000;
+	}
+
+	/**
 	 * Attempts to call another stargate
 	 * This creates and links a call, but does not start it.
 	 * @param target star gate to call
@@ -57,7 +76,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 			// cannot call self
 			return Optional.empty();
 		}
-		if (!this.isAvailable()) {
+		if (!this.isAvailable() || !this.hasEnoughPower()) {
 			return Optional.empty();
 		}
 		if (!target.isAvailable()) {
@@ -232,6 +251,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		nbt.put("Address", address.toNbt());
 		nbt.putInt("State", state.ordinal());
 		nbt.put("Dialer", dialer.toNbt());
+		nbt.putLong("Energy", energy.amount);
 
 		return nbt;
 	}
@@ -246,6 +266,10 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 
 		if (nbt.contains("Dialer")) {
 			this.dialer = new Dialer(this, nbt.getCompound("Dialer")).onCompleted(this::handleDialerComplete);
+		}
+
+		if (nbt.contains("Energy")) {
+			this.energy.amount = nbt.getLong("Energy");
 		}
 	}
 
