@@ -32,6 +32,8 @@ public class SGMixinPlugin implements IMixinConfigPlugin {
         String[] parts = mixinClassName.split("\\.");
 
         String id = parts[4];
+        if (id.equals("ait"))
+            return DependencyChecker.hasAIT();
 
         return true;
     }
