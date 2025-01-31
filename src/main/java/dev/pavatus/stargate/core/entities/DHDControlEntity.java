@@ -3,6 +3,7 @@ package dev.pavatus.stargate.core.entities;
 import java.util.List;
 
 import dev.pavatus.stargate.StargateMod;
+import dev.pavatus.stargate.api.PointOfOriginRegistry;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.api.StargateRef;
 import dev.pavatus.stargate.core.dhd.DHDArrangement;
@@ -47,9 +48,12 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
             TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Vector3f> OFFSET = DataTracker.registerData(DHDControlEntity.class,
             TrackedDataHandlerRegistry.VECTOR3F);
+    private static final TrackedData<String> CONTROL_GLYPH = DataTracker.registerData(DHDControlEntity.class,
+            TrackedDataHandlerRegistry.STRING);
 
     public BlockPos dhdBlockPos;
     private SymbolControl control;
+    private char controlGlyph;
 
     public DHDControlEntity(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world, false);
@@ -98,6 +102,7 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
         this.dataTracker.startTracking(WIDTH, 0.125f);
         this.dataTracker.startTracking(HEIGHT, 0.125f);
         this.dataTracker.startTracking(OFFSET, new Vector3f(0));
+        this.dataTracker.startTracking(CONTROL_GLYPH, "");
     }
 
     @Override
@@ -116,6 +121,7 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
         nbt.putFloat("offsetX", this.getOffset().x());
         nbt.putFloat("offsetY", this.getOffset().y());
         nbt.putFloat("offsetZ", this.getOffset().z());
+        nbt.putString("glyph", this.getControlGlyph());
     }
 
     @Override
@@ -138,6 +144,9 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
 
         if (nbt.contains("offsetX") && nbt.contains("offsetY") && nbt.contains("offsetZ"))
             this.setOffset(new Vector3f(nbt.getFloat("offsetX"), nbt.getFloat("offsetY"), nbt.getFloat("offsetZ")));
+
+        if (nbt.contains("glyph"))
+            this.setControlGlyph(nbt.getString("glyph"));
     }
 
     @Override
@@ -242,6 +251,14 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
         return control;
     }
 
+    public String getControlGlyph() {
+        return this.dataTracker.get(CONTROL_GLYPH);
+    }
+
+    public void setControlGlyph(String string) {
+        this.dataTracker.set(CONTROL_GLYPH, string);
+    }
+
     public Vector3f getOffset() {
         return this.dataTracker.get(OFFSET);
     }
@@ -292,6 +309,7 @@ public class DHDControlEntity extends LinkableDummyLivingEntity {
     public void setControlData(SymbolArrangement type, BlockPos dhdBlockPosition) {
         this.dhdBlockPos = dhdBlockPosition;
         this.control = type.getControl();
+        this.setControlGlyph(String.valueOf(type.getControl().getGlyph()));
 
         this.setIdentity(this.control.getClass().getSimpleName());
         this.setControlWidth(type.getScale().width);

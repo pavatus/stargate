@@ -2,6 +2,7 @@ package dev.pavatus.stargate.api;
 
 import dev.drtheo.scheduler.api.Scheduler;
 import dev.drtheo.scheduler.api.TimeUnit;
+import dev.pavatus.lib.util.ServerLifecycleHooks;
 import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.core.StargateSounds;
 import net.minecraft.nbt.NbtCompound;
@@ -25,6 +26,8 @@ public class Dialer {
 	private Rotation lastRotation;
 	private int rotationTicks;
 	private int maxRotationTicks;
+	private boolean isDHD;
+	private boolean pointOfOrigin;
 
 	public Dialer(Stargate parent) {
 		this.selected = GLYPHS[0];
@@ -44,6 +47,8 @@ public class Dialer {
 		} else {
 			this.lastRotation = Rotation.FORWARD;
 		}
+		this.isDHD = nbt.getBoolean("IsDHD");
+		this.pointOfOrigin = nbt.getBoolean("PointOfOrigin");
 	}
 
 	public NbtCompound toNbt() {
@@ -55,6 +60,8 @@ public class Dialer {
 		nbt.putInt("MaxRotationTicks", this.getMaxRotationTicks());
 		if (this.lastRotation == null) this.lastRotation = Rotation.FORWARD;
 		nbt.putString("LastRotation", this.lastRotation.name());
+		nbt.putBoolean("IsDHD", this.isDHD);
+		nbt.putBoolean("PointOfOrigin", this.pointOfOrigin);
 		return nbt;
 	}
 
@@ -77,6 +84,10 @@ public class Dialer {
 	}
 	public float getRotationProgress() {
 		return MathHelper.clamp((float) this.getRotationTicks() / ((float) this.getMaxRotationTicks()), 0, 1);
+	}
+
+	public String getCurrentDialSequence() {
+		return this.target;
 	}
 
 	public boolean dial(String address, TimeUnit unit, long delay) {
@@ -139,7 +150,23 @@ public class Dialer {
 	 * @return whether the dialer is filled
 	 */
 	public boolean isComplete() {
-		return this.target.length() == 7;
+		return this.getIsDHD() ? this.pointOfOrigin && this.target.length() == 7: this.target.length() == 7;
+	}
+
+	public void setPointOfOrigin(boolean pointOfOrigin) {
+		this.pointOfOrigin = pointOfOrigin;
+		if (this.pointOfOrigin) this.parent.handleDialerComplete(this);
+		this.parent.sync();
+	}
+
+	public void setIsDHD(boolean isDHD) {
+		if (this.isDHD) return;
+		this.isDHD = isDHD;
+		this.parent.sync();
+	}
+
+	public boolean getIsDHD() {
+		return this.isDHD;
 	}
 
 	public Optional<Stargate> toStargate(World world) {
@@ -152,10 +179,13 @@ public class Dialer {
 	}
 	public Optional<StargateCall> complete(Stargate source, World world) {
 		Stargate target = this.toStargate(world).orElse(null);
+		System.out.println(target);
 
 		this.clear();
 
 		if (target == null) {
+			this.setIsDHD(false);
+			this.setPointOfOrigin(false);
 			source.playSound(StargateSounds.GATE_FAIL, 0.25f, 1f);
 			return Optional.empty();
 		}
@@ -180,6 +210,8 @@ public class Dialer {
 		this.target = "";
 		this.firstMove = true;
 		this.isAutoDialing = false;
+		this.setIsDHD(false);
+		this.setPointOfOrigin(false);
 		this.parent.sync();
 		return old;
 	}
@@ -190,6 +222,7 @@ public class Dialer {
 	 */
 	public void lock() {
 		this.append(this.selected);
+		this.parent.sync();
 
 		this.parent.playSound(StargateSounds.CHEVRON_LOCK, 0.25f, StargateMod.RANDOM.nextFloat(0.9f, 1.1f));
 	}
@@ -199,6 +232,7 @@ public class Dialer {
 
 	public void setSelected(char glyph) {
 		this.selected = glyph;
+		this.parent.sync();
 	}
 
 	/**

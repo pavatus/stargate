@@ -23,6 +23,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,6 +89,26 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 		}
 
 		super.onStateReplaced(state, world, pos, newState, moved);
+	}
+
+	@Override
+	public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+		BlockEntity be = world.getBlockEntity(pos);
+		if (be instanceof StargateBlockEntity) {
+			((StargateBlockEntity) be).onBreak();
+		}
+
+		super.onBroken(world, pos, state);
+	}
+
+	@Override
+	public void onDestroyedByExplosion(World world, BlockPos pos, Explosion explosion) {
+		BlockEntity be = world.getBlockEntity(pos);
+		if (be instanceof StargateBlockEntity) {
+			((StargateBlockEntity) be).onBreak();
+		}
+
+		super.onDestroyedByExplosion(world, pos, explosion);
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 
 public class Symbol extends SymbolControl {
-
     public Symbol(char a) {
         super(a);
     }
