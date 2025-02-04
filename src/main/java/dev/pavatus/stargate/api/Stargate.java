@@ -13,27 +13,18 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class Stargate implements StargateCall.Wiretap, Disposable {
+public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnergy {
 	private final Address address;
 	private final List<Subscriber> subscribers;
 	private StargateCall call;
 	private GateState state;
 	private Dialer dialer;
-
-	public final SimpleEnergyStorage energy = new SimpleEnergyStorage(100000, 32, 0) {
-		@Override
-		protected void onFinalCommit() {
-			Stargate.this.sync();
-		}
-	};
 
 	protected Stargate(Address address) {
 		this.address = address;
@@ -54,15 +45,22 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		return this.call == null;
 	}
 
-	/**
-	 * @return whether this stargate has enough power for a call
-	 */
-	public boolean hasEnoughPower() {
-		return this.energy.amount >= this.getRequiredPower();
+	@Override
+	public long getEnergy() {
+		return Long.MAX_VALUE;
+	}
+	@Override
+	public long getRequiredEnergy(Address address) {
+		return StargateEnergy.getRequiredEnergy(this.address, address, this.getMaxEnergy());
+	}
+	@Override
+	public void setEnergy(long amount) {
+		// no op
 	}
 
-	public int getRequiredPower() {
-		return 50000;
+	@Override
+	public long getMaxEnergy() {
+		return 100000;
 	}
 
 	/**
@@ -76,7 +74,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 			// cannot call self
 			return Optional.empty();
 		}
-		if (!this.isAvailable() || !this.hasEnoughPower()) {
+		if (!this.isAvailable() || !this.hasEnoughEnergy(target.address)) {
 			return Optional.empty();
 		}
 		if (!target.isAvailable()) {
@@ -90,6 +88,8 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		this.call.subscribe(target);
 
 		this.subscribers.forEach(s -> s.onCallCreate(this, this.call));
+
+		this.setEnergy(this.getEnergy() - this.getRequiredEnergy(target.address));
 
 		this.sync();
 
@@ -251,7 +251,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		nbt.put("Address", address.toNbt());
 		nbt.putInt("State", state.ordinal());
 		nbt.put("Dialer", dialer.toNbt());
-		nbt.putLong("Energy", energy.amount);
+		nbt.putLong("Energy", this.getEnergy());
 
 		return nbt;
 	}
@@ -269,7 +269,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		}
 
 		if (nbt.contains("Energy")) {
-			this.energy.amount = nbt.getLong("Energy");
+			this.setEnergy(nbt.getLong("Energy"));
 		}
 	}
 

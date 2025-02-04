@@ -4,7 +4,6 @@ import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.Address;
 import dev.pavatus.stargate.api.Dialer;
 import dev.pavatus.stargate.api.Stargate;
-import dev.pavatus.stargate.api.StargateRef;
 import dev.pavatus.stargate.client.models.StargateModel;
 import dev.pavatus.stargate.client.portal.PortalRendering;
 import dev.pavatus.stargate.core.block.StargateBlock;
@@ -19,7 +18,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -53,7 +51,7 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
             this.setFromDialer(dialer, state);
             this.renderGlyphs(matrices, vertexConsumers, gate);
 
-            power = gate.hasEnoughPower() ? 1 : (float) gate.energy.amount / gate.getRequiredPower();
+            power = Math.min(gate.getEnergy() / gate.getMaxEnergy(), 1);
         }
 
         this.model.animateStargateModel(entity, state, entity.age);
