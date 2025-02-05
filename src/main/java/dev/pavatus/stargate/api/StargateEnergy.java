@@ -21,7 +21,7 @@ public interface StargateEnergy {
 
 	static long getRequiredEnergy(Address source, Address target, long limit) {
 		DistanceInformation distance = source.distanceTo(target);
-		long energy = (long) (limit * Math.exp(-distance.distance())); // todo - this math dont work
+		long energy = (long) (limit * Math.exp(-distance.distance() * 0.025f) + 25000);
 		if (distance.dimChange()) {
 			energy += 1000; // Add a set amount if dimChanged
 		}
