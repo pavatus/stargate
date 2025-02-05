@@ -160,7 +160,13 @@ public class Dialer {
 			return Optional.empty();
 		}
 
-		return source.dialImmediately(target);
+		Optional<StargateCall> result = source.dialImmediately(target);
+
+		if (result.isEmpty()) {
+			source.playSound(StargateSounds.GATE_FAIL, 0.25f, 1f);
+		}
+
+		return result;
 	}
 
 	protected void append(char c) {

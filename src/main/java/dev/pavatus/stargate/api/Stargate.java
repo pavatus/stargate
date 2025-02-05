@@ -13,14 +13,13 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class Stargate implements StargateCall.Wiretap, Disposable {
+public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnergy {
 	private final Address address;
 	private final List<Subscriber> subscribers;
 	private StargateCall call;
@@ -46,6 +45,24 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		return this.call == null;
 	}
 
+	@Override
+	public long getEnergy() {
+		return Long.MAX_VALUE;
+	}
+	@Override
+	public long getRequiredEnergy(Address address) {
+		return StargateEnergy.getRequiredEnergy(this.address, address, this.getMaxEnergy());
+	}
+	@Override
+	public void setEnergy(long amount) {
+		// no op
+	}
+
+	@Override
+	public long getMaxEnergy() {
+		return 100000;
+	}
+
 	/**
 	 * Attempts to call another stargate
 	 * This creates and links a call, but does not start it.
@@ -57,7 +74,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 			// cannot call self
 			return Optional.empty();
 		}
-		if (!this.isAvailable()) {
+		if (!this.isAvailable() || !this.hasEnoughEnergy(target.address)) {
 			return Optional.empty();
 		}
 		if (!target.isAvailable()) {
@@ -71,6 +88,8 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		this.call.subscribe(target);
 
 		this.subscribers.forEach(s -> s.onCallCreate(this, this.call));
+
+		this.setEnergy(this.getEnergy() - this.getRequiredEnergy(target.address));
 
 		this.sync();
 
@@ -232,6 +251,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		nbt.put("Address", address.toNbt());
 		nbt.putInt("State", state.ordinal());
 		nbt.put("Dialer", dialer.toNbt());
+		nbt.putLong("Energy", this.getEnergy());
 
 		return nbt;
 	}
@@ -246,6 +266,10 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 
 		if (nbt.contains("Dialer")) {
 			this.dialer = new Dialer(this, nbt.getCompound("Dialer")).onCompleted(this::handleDialerComplete);
+		}
+
+		if (nbt.contains("Energy")) {
+			this.setEnergy(nbt.getLong("Energy"));
 		}
 	}
 

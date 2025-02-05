@@ -4,7 +4,6 @@ import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.Address;
 import dev.pavatus.stargate.api.Dialer;
 import dev.pavatus.stargate.api.Stargate;
-import dev.pavatus.stargate.api.StargateRef;
 import dev.pavatus.stargate.client.models.StargateModel;
 import dev.pavatus.stargate.client.portal.PortalRendering;
 import dev.pavatus.stargate.core.block.StargateBlock;
@@ -19,7 +18,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -45,19 +43,22 @@ public class StargateBlockEntityRenderer implements BlockEntityRenderer<Stargate
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180f));
         matrices.scale(1.75f, 1.75f, 1.75f);
 
+        float power = 1;
 
         if (entity.hasStargate()) {
             Stargate gate = entity.getStargate().get();
             Dialer dialer = gate.getDialer();
             this.setFromDialer(dialer, state);
             this.renderGlyphs(matrices, vertexConsumers, gate);
+
+            power = Math.min(gate.getEnergy() / gate.getMaxEnergy(), 1);
         }
 
         this.model.animateStargateModel(entity, state, entity.age);
         int lightAbove = WorldRenderer.getLightmapCoordinates(entity.getWorld(), entity.getPos().up().up().up().up());
         this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutout(TEXTURE)), lightAbove, overlay, 1, 1, 1, 1);
         PortalRendering.renderPortal(entity, state, matrices, EMISSION, this.model.portal);
-        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, 1, 1, 1);
+        this.model.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCullZOffset(EMISSION)), 0xF000F0, overlay, 1, power, power, 1);
         this.model.portal.visible = state == Stargate.GateState.OPEN;
 
         matrices.pop();

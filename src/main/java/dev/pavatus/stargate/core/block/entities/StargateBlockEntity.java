@@ -29,6 +29,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +40,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	public AnimationState ANIM_STATE = new AnimationState();
 	private static final Identifier SYNC_GATE_STATE = new Identifier(StargateMod.MOD_ID, "sync_gate_state");
 	public int age;
-
+	
 	static {
 		ClientPlayNetworking.registerGlobalReceiver(StargateBlockEntity.SYNC_GATE_STATE,
 				(client, handler, buf, responseSender) -> {

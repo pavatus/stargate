@@ -21,6 +21,13 @@ repositories {
 			artifact() // Look directly for artifact
 		}
 	}
+
+	maven {
+		url "https://cursemaven.com"
+		content {
+			includeGroup "curse.maven"
+		}
+	}
 }
 
 sourceSets {
@@ -48,6 +55,8 @@ dependencies {
 	include(modImplementation("com.github.DrTheodor:mc-scheduler:${project.scheduler_version}")) {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
+
+	modCompileOnlyApi ("teamreborn:energy:${project.tech_version}")
 }
 
 processResources {
