@@ -208,13 +208,12 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		world.playSound(null, this.address.pos().getPos(), sound, SoundCategory.BLOCKS, volume, pitch);
 	}
 
-	public void handleDialerComplete(Dialer d) {
+	private void handleDialerComplete(Dialer d) {
 		if (this.call != null) {
 			this.call.end();
 		}
 
-		StargateCall call = d.complete(this, ServerLifecycleHooks.get()
-				.getWorld(this.getAddress().pos().getDimension())).orElse(null);
+		StargateCall call = d.complete(this, ServerLifecycleHooks.get().getOverworld()).orElse(null);
 		if (call == null) return;
 		call.start();
 	}
@@ -271,7 +270,6 @@ public class Stargate implements StargateCall.Wiretap, Disposable {
 		Stargate created = new Stargate(address);
 		StargateNetwork.getInstance(true).add(created);
 		created.getDialer().setSelected('Q');
-		created.sync();
 		return created;
 	}
 

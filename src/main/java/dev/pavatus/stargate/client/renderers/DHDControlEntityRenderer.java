@@ -1,8 +1,10 @@
 package dev.pavatus.stargate.client.renderers;
 
+import dev.pavatus.stargate.StargateMod;
 import dev.pavatus.stargate.api.Address;
 import dev.pavatus.stargate.api.Stargate;
 import dev.pavatus.stargate.client.models.ControlModel;
+import dev.pavatus.stargate.core.block.DHDBlock;
 import dev.pavatus.stargate.core.entities.DHDControlEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,13 +42,10 @@ public class DHDControlEntityRenderer extends LivingEntityRenderer<DHDControlEnt
 
         Stargate stargate = livingEntity.getStargate().get();
 
-        if (stargate == null ||
-                name.contains(Text.literal("?"))) {
+        if (stargate == null) {
+            matrixStack.pop();
             return;
         }
-
-        boolean bl = stargate.getDialer().contains(name.getString().charAt(0));
-        System.out.println(stargate.getDialer().getCurrentDialSequence());
 
         matrixStack.push();
         matrixStack.translate(0.0f, f, 0.0f);
@@ -59,7 +58,7 @@ public class DHDControlEntityRenderer extends LivingEntityRenderer<DHDControlEnt
         Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
         OrderedText orderedText = name.asOrderedText();
 
-        textRenderer.drawWithOutline(orderedText, h, (float) name.getString().length(), bl ? 0xedb334 : 0x4f4f4f, 0x000000,
+        textRenderer.drawWithOutline(orderedText, h, (float) name.getString().length(), livingEntity.shouldGlow() ? 0xedb334 : 0x4f4f4f, 0x000000,
                 matrix4f, vertexConsumerProvider, 0xFF);
         matrixStack.pop();
         super.render(livingEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);

@@ -17,36 +17,36 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PointOfOriginRegistry extends SimpleDatapackRegistry<PointOfOriginRegistry.PointOfOrigin> {
+public class PointOfOriginRegistry extends SimpleDatapackRegistry<PointOfOriginRegistry.Symbol> {
 	private PointOfOriginRegistry() {
-		super(PointOfOrigin::fromInputStream, PointOfOrigin.CODEC, "point_of_origin", true);
+		super(Symbol::fromInputStream, Symbol.CODEC, "point_of_origin", true);
 	}
 
 	@Override
 	protected void defaults() {
-		register(new PointOfOrigin(World.OVERWORLD, 'Q'));
+		register(new Symbol(World.OVERWORLD, 'Q'));
 	}
 
 	@Override
-	public PointOfOrigin fallback() {
+	public Symbol fallback() {
 		return get(World.OVERWORLD.getValue());
 	}
 
 	@Override
-	public PointOfOrigin get(Identifier id) {
-		return this.REGISTRY.computeIfAbsent(id, key -> new PointOfOrigin(key, (char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length))));
+	public Symbol get(Identifier id) {
+		return this.REGISTRY.computeIfAbsent(id, key -> new Symbol(key, (char) ('A' + StargateMod.RANDOM.nextInt(Dialer.GLYPHS.length))));
 	}
 
-	public record PointOfOrigin(Identifier dimension, char glyph) implements Identifiable {
-		public static final Codec<PointOfOrigin> CODEC = Codecs.exceptionCatching(RecordCodecBuilder.create(instance -> instance.group(
-				Identifier.CODEC.fieldOf("dimension").forGetter(PointOfOrigin::dimension),
-				Codec.STRING.fieldOf("glyph").forGetter(pointOfOrigin -> String.valueOf(pointOfOrigin.glyph()))
-		).apply(instance, PointOfOrigin::new)));
+	public record Symbol(Identifier dimension, char glyph) implements Identifiable {
+		public static final Codec<Symbol> CODEC = Codecs.exceptionCatching(RecordCodecBuilder.create(instance -> instance.group(
+				Identifier.CODEC.fieldOf("dimension").forGetter(Symbol::dimension),
+				Codec.STRING.fieldOf("glyph").forGetter(symbol -> String.valueOf(symbol.glyph()))
+		).apply(instance, Symbol::new)));
 
-		private PointOfOrigin(Identifier dimension, String glyph) {
+		private Symbol(Identifier dimension, String glyph) {
 			this(dimension, glyph.charAt(0));
 		}
-		public PointOfOrigin(RegistryKey<World> dimension, char glyph) {
+		public Symbol(RegistryKey<World> dimension, char glyph) {
 			this(dimension.getValue(), glyph);
 		}
 		private static char cleanseChar(char input) {
@@ -54,12 +54,12 @@ public class PointOfOriginRegistry extends SimpleDatapackRegistry<PointOfOriginR
 			return (char) ('A' + (input - 'A') % 26);
 		}
 
-		public static PointOfOrigin fromInputStream(InputStream stream) {
+		public static Symbol fromInputStream(InputStream stream) {
 			return fromJson(JsonParser.parseReader(new InputStreamReader(stream)).getAsJsonObject());
 		}
 
-		public static PointOfOrigin fromJson(JsonObject json) {
-			AtomicReference<PointOfOrigin> created = new AtomicReference<>();
+		public static Symbol fromJson(JsonObject json) {
+			AtomicReference<Symbol> created = new AtomicReference<>();
 
 			CODEC.decode(JsonOps.INSTANCE, json).get().ifLeft(planet -> created.set(planet.getFirst())).ifRight(err -> {
 				created.set(null);

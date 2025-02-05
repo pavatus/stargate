@@ -57,9 +57,7 @@ public class DHDArrangement {
             new SymbolArrangement(new Symbol('Y'), EntityDimensions.changing(0.1f, 0.1f),
                     new Vector3f(0.19687423016875982f, 0.7874969458207488f, 0.26875610183924437f)), // TODO
             new SymbolArrangement(new Symbol('Z'), EntityDimensions.changing(0.1f, 0.1f),
-                    new Vector3f(-0.4281257791444659f, 0.662498471327126f, -0.04374390281736851f)), // TODO
-            new SymbolArrangement(new Symbol('?'), EntityDimensions.changing(0.25f, 0.1f),
-                    new Vector3f(-3.7997961044311523E-7f, 0.7375015262514353f, -0.10000000149011612f)), // TODO
+                    new Vector3f(-0.4281257791444659f, 0.662498471327126f, -0.04374390281736851f)) // TODO
     };
 
     public static SymbolArrangement[] getSymbolArrangement() {

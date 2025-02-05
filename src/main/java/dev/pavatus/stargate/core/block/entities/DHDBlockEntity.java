@@ -77,10 +77,6 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
 
     public void onBroken() {
         this.killControls();
-        Stargate stargate = this.getStargate().get();
-        if (stargate == null) return;
-        stargate.getDialer().setIsDHD(false);
-        stargate.getDialer().setPointOfOrigin(false);
     }
 
     public void killControls() {
@@ -93,8 +89,6 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
 
         if (!(this.world instanceof ServerWorld serverWorld))
             return;
-
-        if (this.getStargate().get() == null) return;
 
         this.killControls();
         SymbolArrangement[] controls = DHDControlEntity.getSymbolArrangement();
