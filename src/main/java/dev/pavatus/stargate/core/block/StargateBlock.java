@@ -99,15 +99,6 @@ public class StargateBlock extends HorizontalFacingBlock implements BlockEntityP
 	}
 
 	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-		if (world.getBlockEntity(pos) instanceof StargateBlockEntity be) {
-			be.onPlaced(world, pos, state, null, null);
-		}
-
-		super.onBlockAdded(state, world, pos, oldState, notify);
-	}
-
-	@Override
 	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
 		return new StargateBlockEntity(pos, state);
 	}
