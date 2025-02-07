@@ -34,6 +34,13 @@ public record Address(String text, DirectedGlobalPos pos) {
 		return toGlyphs(text);
 	}
 
+	public DistanceInformation distanceTo(Address other) {
+		double distance = Math.sqrt(pos.getPos().getSquaredDistance(other.pos.getPos()));
+		boolean dimChange = pos.getDimension() != other.pos.getDimension();
+		boolean rotChange = pos.getRotation() != other.pos.getRotation();
+		return new DistanceInformation(distance, dimChange, rotChange);
+	}
+
 	public static Text toGlyphs(String text) {
 		return Text.literal(text).fillStyle(STYLE);
 	}

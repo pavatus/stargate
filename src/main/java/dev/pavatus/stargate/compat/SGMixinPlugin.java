@@ -31,7 +31,10 @@ public class SGMixinPlugin implements IMixinConfigPlugin {
 
         String[] parts = mixinClassName.split("\\.");
 
-        String id = parts[4];
+        String id = parts[5];
+
+        if (id.equals("energy"))
+            return DependencyChecker.hasTechEnergy();
 
         return true;
     }
