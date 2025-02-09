@@ -10,16 +10,21 @@ import dev.pavatus.stargate.core.block.DHDBlock;
 import dev.pavatus.stargate.core.block.StargateBlock;
 import dev.pavatus.stargate.core.block.StargateRingBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.item.Item;
 
 public class StargateBlocks extends BlockContainer {
 	@PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
-	public static final Block STARGATE = new StargateBlock(ABlockSettings.create().nonOpaque());
+	public static final Block STARGATE = new StargateBlock(ABlockSettings.create().nonOpaque().requiresTool().instrument(Instrument.BASEDRUM).strength(5.5F, 10.0F)
+			.pistonBehavior(PistonBehavior.IGNORE).luminance(light -> 3));
 	@PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
 	@NoEnglish
-	public static final Block DHD = new DHDBlock(ABlockSettings.create().nonOpaque());
+	public static final Block DHD = new DHDBlock(ABlockSettings.create().nonOpaque().requiresTool().instrument(Instrument.BASEDRUM).strength(0.5F, 6.0F)
+			.pistonBehavior(PistonBehavior.IGNORE).luminance(light -> 3));
 	@NoBlockItem
-	public static final Block RING = new StargateRingBlock(ABlockSettings.create().nonOpaque());
+	public static final Block RING = new StargateRingBlock(ABlockSettings.create().nonOpaque().requiresTool().instrument(Instrument.BASEDRUM).strength(0.5F, 6.0F)
+			.pistonBehavior(PistonBehavior.IGNORE).luminance(light -> 3));
 
 	@Override
 	public Item.Settings createBlockItemSettings(Block block) {
