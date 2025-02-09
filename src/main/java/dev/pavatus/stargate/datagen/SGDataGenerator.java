@@ -2,6 +2,7 @@ package dev.pavatus.stargate.datagen;
 
 import dev.pavatus.lib.datagen.lang.LanguageType;
 import dev.pavatus.lib.datagen.lang.SakitusLanguageProvider;
+import dev.pavatus.lib.datagen.loot.SakitusBlockLootTable;
 import dev.pavatus.lib.datagen.sound.SakitusSoundProvider;
 import dev.pavatus.lib.datagen.tag.SakitusBlockTagProvider;
 import dev.pavatus.stargate.core.StargateBlocks;
@@ -17,10 +18,14 @@ public class SGDataGenerator implements DataGeneratorEntrypoint {
         genLang(pack);
         genSounds(pack);
         genTags(pack);
+        genLoot(pack);
     }
 
     private void genTags(FabricDataGenerator.Pack pack) {
         pack.addProvider((((output, registriesFuture) -> new SakitusBlockTagProvider(output, registriesFuture).withBlocks(StargateBlocks.class))));
+    }
+    private void genLoot(FabricDataGenerator.Pack pack) {
+         pack.addProvider((((output, registriesFuture) -> new StargateBlockLootProvider(output).withBlocks(StargateBlocks.class))));
     }
 
     private void genLang(FabricDataGenerator.Pack pack) {

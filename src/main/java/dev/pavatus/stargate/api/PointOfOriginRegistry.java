@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PointOfOriginRegistry extends SimpleDatapackRegistry<PointOfOriginRegistry.Symbol> {
 	private PointOfOriginRegistry() {
-		super(Symbol::fromInputStream, Symbol.CODEC, "point_of_origin", true);
+		super(Symbol::fromInputStream, Symbol.CODEC, "point_of_origin", true, StargateMod.MOD_ID);
 	}
 
 	@Override
