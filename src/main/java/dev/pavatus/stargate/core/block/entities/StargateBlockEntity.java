@@ -23,13 +23,15 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +42,9 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	public AnimationState ANIM_STATE = new AnimationState();
 	private static final Identifier SYNC_GATE_STATE = new Identifier(StargateMod.MOD_ID, "sync_gate_state");
 	public int age;
-	
+	public boolean requiresPlacement = false;
+
+
 	static {
 		ClientPlayNetworking.registerGlobalReceiver(StargateBlockEntity.SYNC_GATE_STATE,
 				(client, handler, buf, responseSender) -> {
@@ -113,10 +117,13 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		if (world.isClient()) return;
 
-		createRing(StargateBlocks.RING.getDefaultState());
+		this.onBreak();
+		this.requiresPlacement = false;
 
-		Direction facing = this.getWorld().getBlockState(this.getPos()).get(StargateBlock.FACING);
-		DirectedGlobalPos globalPos = DirectedGlobalPos.create(this.getWorld().getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing));
+		createRing(StargateBlocks.RING.getDefaultState(), (ServerWorld) world);
+
+		Direction facing = world.getBlockState(this.getPos()).get(StargateBlock.FACING);
+		DirectedGlobalPos globalPos = DirectedGlobalPos.create(world.getRegistryKey(), this.getPos(), DirectedGlobalPos.getGeneralizedRotation(facing));
 		this.setStargate(StargateRef.createAs(this, Stargate.create(new Address(globalPos))));
 	}
 
@@ -129,7 +136,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	 * @param state the state to create the ring with
 	 * @return the positions of the blocks created
 	 */
-	public Set<BlockPos> createRing(BlockState state) {
+	public Set<BlockPos> createRing(BlockState state, ServerWorld world) {
 		int radius = this.getRingRadius(); // Adjust the radius as needed
 		Set<BlockPos> ringPositions = new HashSet<>();
 		BlockPos center = this.getPos().up(radius);
@@ -180,7 +187,7 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 	 * @return the positions of the blocks removed
 	 */
 	public Set<BlockPos> removeRing() {
-		return createRing(Blocks.AIR.getDefaultState());
+		return createRing(Blocks.AIR.getDefaultState(), (ServerWorld) this.getWorld());
 	}
 
 	private void syncGateState() {
@@ -207,6 +214,10 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 			return;
 		}
 		if (world.getServer() == null) return;
+
+		if (this.requiresPlacement) {
+			this.onPlaced(world, pos, state, null, ItemStack.EMPTY);
+		}
 
 		if (world.getServer().getTicks() % 5 == 0) {
 			if (!this.hasStargate()) return;

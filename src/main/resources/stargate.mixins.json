@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "dev.pavatus.stargate.compat.SGMixinPlugin",
   "mixins": [
+    "StructureTemplateMixin",
     "compat.energy.EnergyStargateMixin"
   ],
   "client": [
