@@ -89,15 +89,10 @@ public class StargateBlockEntity extends StargateLinkableBlockEntity implements 
 
 		if (player.isSneaking()) {
 			dialer.lock();
-			player.sendMessage(Text.literal("LOCKED " + dialer.getSelected() + " (" + dialer.getAmountLocked() + "/7)"), false);
-
-			player.sendMessage(Text.literal("THIS IS ").append(gate.getAddress().toGlyphs()).append(Text.literal(" (" + gate.getAddress().text() + ")")), true);
-
 			return ActionResult.SUCCESS;
 		}
 
 		dialer.next();
-		player.sendMessage(Text.literal("SELECTED " + dialer.getSelected()), true);
 
 		return ActionResult.SUCCESS;
 	}

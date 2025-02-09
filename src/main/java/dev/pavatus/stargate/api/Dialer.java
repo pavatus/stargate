@@ -79,7 +79,7 @@ public class Dialer {
 		return MathHelper.clamp((float) this.getRotationTicks() / ((float) this.getMaxRotationTicks()), 0, 1);
 	}
 
-	public boolean dial(String address, TimeUnit unit, long delay) {
+	public boolean dial(String address, TimeUnit unit, long delay, boolean lock) {
 		if (this.isAutoDialing) return false;
 		delay = delay / 2;
 
@@ -88,20 +88,20 @@ public class Dialer {
 		}
 
 		this.setMaxRotationTicks((int) TimeUnit.TICKS.from(unit, delay));
-		this.internalDial(address, 0);
+		this.internalDial(address, 0, lock);
 		this.isAutoDialing = true;
 		return true;
 	}
 
-	public boolean dial(Address address, TimeUnit unit, long delay) {
-		return this.dial(address.text(), unit, delay);
+	public boolean dial(Address address, TimeUnit unit, long delay, boolean lock) {
+		return this.dial(address.text(), unit, delay, lock);
 	}
 
-	public boolean dial(char target, TimeUnit unit, long delay) {
-		return this.dial(String.valueOf(target), unit, delay);
+	public boolean dial(char target, TimeUnit unit, long delay, boolean lock) {
+		return this.dial(String.valueOf(target), unit, delay, lock);
 	}
 
-	private void internalDial(String address, int i) {
+	private void internalDial(String address, int i, boolean lock) {
 		if (i == address.length()) {
 			this.isAutoDialing = false;
 			return;
@@ -121,7 +121,9 @@ public class Dialer {
 			if (this.selected != address.charAt(i)) {
 				this.rotateTowards(address.charAt(i), false);
 			} else {
-				this.lock();
+				if (lock) {
+					this.lock();
+				}
 				i++;
 				this.setRotationTicks(-this.getMaxRotationTicks());
 
@@ -132,7 +134,7 @@ public class Dialer {
 		}
 
 		int finalI = i;
-		Scheduler.get().runTaskLater(() -> this.internalDial(address, finalI), TimeUnit.TICKS, 1);
+		Scheduler.get().runTaskLater(() -> this.internalDial(address, finalI, lock), TimeUnit.TICKS, 1);
 	}
 
 	/**
@@ -230,21 +232,37 @@ public class Dialer {
 		return GLYPHS.length;
 	}
 
-	public char next() {
+	private char next(boolean simulate) {
 		int index = this.getSelectedIndex();
-		this.selected = GLYPHS[(index + 1) % GLYPHS.length];
+		char next = GLYPHS[(index + 1) % GLYPHS.length];
 
-		this.onMove(true);
+		if (!simulate) {
+			this.selected = next;
+			this.onMove(true);
+		}
 
-		return this.selected;
+		return next;
+	}
+	public char next() {
+		char next = this.next(true);
+		this.dial(next, false);
+		return next;
+	}
+	private char previous(boolean simulate) {
+		int index = this.getSelectedIndex();
+		char previous = GLYPHS[(index + GLYPHS.length - 1) % GLYPHS.length];
+
+		if (!simulate) {
+			this.selected = previous;
+			this.onMove(false);
+		}
+
+		return previous;
 	}
 	public char previous() {
-		int index = this.getSelectedIndex();
-		this.selected = GLYPHS[(index + GLYPHS.length - 1) % GLYPHS.length];
-
-		this.onMove(false);
-
-		return this.selected;
+		char previous = this.previous(true);
+		this.dial(previous, false);
+		return previous;
 	}
 
 	protected void onMove(boolean next) {
@@ -288,7 +306,7 @@ public class Dialer {
 		if (this.selected == target) return false;
 
 		Rotation before = this.lastRotation;
-		Rotation after = before;
+		Rotation after;
 
 		if (this.isNextFaster(this.selected, target)) {
 			after = Rotation.FORWARD;
@@ -308,10 +326,10 @@ public class Dialer {
 		Rotation before = this.lastRotation;
 
 		if (this.isNextFaster(this.selected, target)) {
-			this.next();
+			this.next(false);
 			this.lastRotation = Rotation.FORWARD;
 		} else {
-			this.previous();
+			this.previous(false);
 			this.lastRotation = Rotation.BACKWARD;
 		}
 
@@ -323,15 +341,16 @@ public class Dialer {
 	 * @param address the address to dial
 	 */
 	public boolean dial(Address address) {
-		return this.dial(address, TimeUnit.TICKS, 10);
+		return this.dial(address, TimeUnit.TICKS, 10, true);
 	}
 
 	/**
 	 * Dials the target glyph over a period of time
 	 * @param c the target glyph
+	 * @param lock whether to lock the glyph in place
 	 */
-	public boolean dial(char c) {
-		return this.dial(c, TimeUnit.TICKS, 10);
+	public boolean dial(char c, boolean lock) {
+		return this.dial(c, TimeUnit.TICKS, 10, lock);
 	}
 
 	public boolean contains(char glyph) {

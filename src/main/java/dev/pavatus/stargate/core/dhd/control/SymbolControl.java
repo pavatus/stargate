@@ -24,7 +24,7 @@ public class SymbolControl {
     }
 
     public boolean runServer(Stargate stargate, ServerPlayerEntity player, ServerWorld world, BlockPos console) {
-        stargate.getDialer().dial(this.glyph);
+        stargate.getDialer().dial(this.glyph, true);
         return false;
     }
 
