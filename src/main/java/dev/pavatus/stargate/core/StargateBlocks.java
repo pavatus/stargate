@@ -14,6 +14,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.Registries;
 
 public class StargateBlocks extends BlockContainer {
 	@PickaxeMineable(tool = PickaxeMineable.Tool.IRON)
@@ -30,6 +32,6 @@ public class StargateBlocks extends BlockContainer {
 
 	@Override
 	public Item.Settings createBlockItemSettings(Block block) {
-		return new AItemSettings().group(StargateItems.Groups.MAIN);
+		return new AItemSettings().group(Registries.ITEM_GROUP.get(ItemGroups.FUNCTIONAL));
 	}
 }
