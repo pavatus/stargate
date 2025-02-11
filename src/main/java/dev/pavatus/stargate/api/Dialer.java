@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 /**
  * For tracking a dialing sequence in progress
  */
-public class Dialer {
+public class Dialer implements NbtSync {
 	public static final char[] GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 	private final Stargate parent;
 	private String target;
@@ -34,22 +34,40 @@ public class Dialer {
 	}
 	public Dialer(Stargate parent, NbtCompound nbt) {
 		this(parent);
-		this.target = nbt.getString("Target");
+
+		this.loadNbt(nbt);
+	}
+
+	@Override
+	public void loadNbt(NbtCompound nbt, boolean isSync) {
 		this.selected = nbt.getString("Selected").charAt(0);
-		this.isAutoDialing = nbt.getBoolean("AutoDialing");
-		this.rotationTicks = nbt.getInt("RotationTicks");
-		this.maxRotationTicks = nbt.getInt("MaxRotationTicks");
-		if (nbt.contains("LastRotation")) {
-			this.lastRotation = Rotation.valueOf(nbt.getString("LastRotation"));
-		} else {
-			this.lastRotation = Rotation.FORWARD;
+
+		if (isSync) {
+			nbt = getSyncNbt(nbt);
+
+			this.target = nbt.getString("Target");
+			this.isAutoDialing = nbt.getBoolean("AutoDialing");
+			this.rotationTicks = nbt.getInt("RotationTicks");
+			this.maxRotationTicks = nbt.getInt("MaxRotationTicks");
+			if (nbt.contains("LastRotation")) {
+				this.lastRotation = Rotation.valueOf(nbt.getString("LastRotation"));
+			} else {
+				this.lastRotation = Rotation.FORWARD;
+			}
 		}
 	}
 
+	@Override
 	public NbtCompound toNbt() {
 		NbtCompound nbt = new NbtCompound();
-		nbt.putString("Target", this.target);
 		nbt.putString("Selected", String.valueOf(this.selected));
+		return nbt;
+	}
+
+	@Override
+	public NbtCompound toSyncNbt() {
+		NbtCompound nbt = new NbtCompound();
+		nbt.putString("Target", this.target);
 		nbt.putBoolean("AutoDialing", this.isAutoDialing);
 		nbt.putInt("RotationTicks", this.getRotationTicks());
 		nbt.putInt("MaxRotationTicks", this.getMaxRotationTicks());

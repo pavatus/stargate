@@ -80,7 +80,7 @@ public class ServerStargateNetwork extends StargateNetwork {
 	private void sync(Stargate gate, Collection<ServerPlayerEntity> targets) {
 		StargateMod.LOGGER.debug("Syncing stargate {}", gate.getAddress());
 
-		NbtCompound nbt = gate.toNbt();
+		NbtCompound nbt = gate.toNbt(true);
 		PacketByteBuf buf = PacketByteBufs.create();
 		buf.writeNbt(nbt);
 		buf.writeBoolean(false);

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnergy {
+public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnergy, NbtSync {
 	private final Address address;
 	private final List<Subscriber> subscribers;
 	private StargateCall call;
@@ -245,6 +245,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnerg
 		return Math.sqrt(this.address.pos().getPos().getSquaredDistance(pos.getX(), pos.getY(), pos.getZ()));
 	}
 
+	@Override
 	public NbtCompound toNbt() {
 		NbtCompound nbt = new NbtCompound();
 
@@ -259,13 +260,24 @@ public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnerg
 	public static Stargate fromNbt(NbtCompound nbt) {
 		return new Stargate(nbt);
 	}
-	public void loadNbt(NbtCompound nbt) {
+
+	@Override
+	public NbtCompound toSyncNbt() {
+		NbtCompound nbt = new NbtCompound();
+
+		nbt.put("Dialer", this.dialer.toNbt(true));
+
+		return nbt;
+	}
+
+	@Override
+	public void loadNbt(NbtCompound nbt, boolean isSync) {
 		if (nbt.contains("State")) {
 			this.state = GateState.values()[nbt.getInt("State")];
 		}
 
 		if (nbt.contains("Dialer")) {
-			this.dialer = new Dialer(this, nbt.getCompound("Dialer")).onCompleted(this::handleDialerComplete);
+			this.dialer = new Dialer(this, !isSync ? nbt.getCompound("Dialer") : getSyncNbt(nbt).getCompound("Dialer")).onCompleted(this::handleDialerComplete);
 		}
 
 		if (nbt.contains("Energy")) {
@@ -274,7 +286,7 @@ public class Stargate implements StargateCall.Wiretap, Disposable, StargateEnerg
 	}
 
 	public PacketByteBuf writeToPacket(PacketByteBuf buf) {
-		buf.writeNbt(this.toNbt());
+		buf.writeNbt(this.toNbt(true));
 		return buf;
 	}
 	public Stargate readFromPacket(PacketByteBuf buf) {
