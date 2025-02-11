@@ -25,6 +25,11 @@ public class DialerItem extends StargateLinkableItem{
 	}
 
 	@Override
+	public boolean hasGlint(ItemStack stack) {
+		return true;
+	}
+
+	@Override
 	public ActionResult useOnBlock(ItemUsageContext context) {
 		if (context.getWorld().isClient()) return super.useOnBlock(context);
 
