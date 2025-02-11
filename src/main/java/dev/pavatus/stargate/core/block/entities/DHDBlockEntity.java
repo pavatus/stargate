@@ -43,6 +43,9 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
         StargateNetwork network = ServerStargateNetwork.getInstance();
         Stargate target = this.getStargate().get();
 
+        player.sendMessage(target.getAddress().toGlyphs(), true);
+
+        /*
         int counter = 0;
         while (target == this.getStargate().get() && counter++ < 10) {
             target = network.getRandom();
@@ -55,6 +58,8 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
 
         this.getStargate().get().dial(target);
         player.sendMessage(Text.literal("Dialing ").append(target.getAddress().toGlyphs()), true);
+        */
+
         return ActionResult.SUCCESS;
     }
 
