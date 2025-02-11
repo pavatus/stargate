@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " # ",
+        "PRP",
+        "PCP"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:beacon"
+        },
+        "P": {
+            "item": "minecraft:polished_blackstone"
+        },
+        "R": {
+            "item": "minecraft:redstone_block"
+        },
+        "C": {
+            "item": "minecraft:chiseled_polished_blackstone"
+        }
+    },
+    "result": {
+        "item": "stargate:dhd",
+        "count": 1
+    }
+}
