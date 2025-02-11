@@ -44,6 +44,7 @@ public class DHDBlockEntity extends NearestLinkingBlockEntity implements BlockEn
         Stargate target = this.getStargate().get();
 
         player.sendMessage(target.getAddress().toGlyphs(), true);
+        target.dial(target);
 
         /*
         int counter = 0;
