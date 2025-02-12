@@ -5,29 +5,29 @@
 	"name": "STARGATE",
 	"description": "Stargate Mod for Fabric 1.20.1.",
 	"authors": [
-		"PAVATUS"
+		"Amble Labs"
 	],
 	"contact": {
-		"homepage": "https://pavatus.github.io",
-		"sources": "https://github.com/pavatus/stargate/",
-		"issues": "https://github.com/pavatus/stargate/issues"
+		"homepage": "https://amblelabs.github.io",
+		"sources": "https://github.com/amblelabs/stargate/",
+		"issues": "https://github.com/amblelabs/stargate/issues"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/stargate/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"dev.pavatus.stargate.StargateMod",
-			"dev.pavatus.stargate.compat.Compat"
+          "dev.amble.stargate.StargateMod",
+          "dev.amble.stargate.compat.Compat"
 		],
 		"fabric-datagen": [
-			"dev.pavatus.stargate.datagen.SGDataGenerator"
+          "dev.amble.stargate.datagen.SGDataGenerator"
 		],
 		"client": [
-			"dev.pavatus.stargate.client.StargateModClient"
+          "dev.amble.stargate.client.StargateModClient"
 		],
 		"sakitus-main": [
-			"dev.pavatus.stargate.sakitus.SakitusHandler"
+          "dev.amble.stargate.sakitus.SakitusHandler"
 		]
 	},
 	"mixins": [
